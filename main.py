@@ -1,12 +1,20 @@
 import uvicorn
 from fastapi import FastAPI
 
-from app.api.endpoints.todo import todo_router
+from app.api.routers.routers import all_routers
 
 
-app = FastAPI()
+app = FastAPI(
+    tilte = "Currency exchange app"
+)
 
-app.include_router(todo_router)
+for router in all_routers:
+    app.include_router(router)
+
+
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to the Currency Exchange Rates API server"}
 
 
 @app.get("/healthcheck", include_in_schema=False)
