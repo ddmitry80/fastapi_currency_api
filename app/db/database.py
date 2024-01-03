@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from sqlalchemy import LargeBinary
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
@@ -22,6 +23,10 @@ class Base(DeclarativeBase):
     
     def as_dict(self) -> dict:
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+    @abstractmethod
+    def to_pydantic_model(self):
+        raise NotImplementedError
 
 
 async def get_async_session():

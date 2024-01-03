@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import Type
 
 from app.db.database import async_session_maker
-from app.repositories.todo_repository import ToDoRepository
+from app.repositories.user_repository import UserRepository
 
 
 class IUnitOfWork(ABC):
-    todo: ToDoRepository
+    user: Type[UserRepository]
 
     @abstractmethod
     def __init__(self):
@@ -35,7 +36,7 @@ class UnitOfWork(IUnitOfWork):
     async def __aenter__(self):
         self.session = self.session_factory()
 
-        self.todo = ToDoRepository(self.session)
+        self.user = UserRepository(self.session)
 
     async def __aexit__(self, *args):
         await self.rollback()
