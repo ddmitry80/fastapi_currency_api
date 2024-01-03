@@ -1,16 +1,20 @@
 import datetime
 import re
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, constr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 print(f"module {__name__} import done")
 
+# STRONG_PASSWORD_PATTERN = r"^(?=.*[\d])(?=.*[!@#$%^&*])[\w!@#$%^&*]{6,128}$"
+STRONG_PASSWORD_PATTERN = r"^[a-zA-Z\d]+$"
 
 class UserCreate(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=6, max_length=128)
+    # password: Annotated[str, StringConstraints(min_length=6, max_length=128, strip_whitespace=True, pattern=STRONG_PASSWORD_PATTERN)]
+    password: str = Field(min_length=6, max_length=128, pattern=STRONG_PASSWORD_PATTERN)
+    is_admin: bool = False
 
 
 class UserFromDB(BaseModel):
@@ -33,5 +37,5 @@ class AccessTokenResponse(BaseModel):
     refresh_token: str
 
 
-class UserResponse(BaseModel):
-    email: EmailStr
+# class UserResponse(BaseModel):
+#     email: EmailStr

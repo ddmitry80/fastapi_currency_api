@@ -11,7 +11,7 @@ import jwt
 from app.api.endpoints.auth.exceptions import AuthorizationFailed, AuthRequired, InvalidToken
 from app.api.schemas.auth import JWTData, UserFromDB
 from core.config import settings
-from services.auth import get_user_by_id
+from app.services.user import UserService
 # from src.auth.service import get_user_by_id
 
 print(f"module {__name__} import done")
