@@ -29,8 +29,7 @@ def create_access_token(
         "exp": datetime.utcnow() + expires_delta,
         "is_admin": user["is_admin"],
     }
-
-    return jwt.encode(jwt_data, AuthConfig.JWT_SECRET, algorithm=auth_config.JWT_ALG)
+    return jwt.encode(payload=jwt_data, key=AuthConfig.JWT_SECRET, algorithm=auth_config.JWT_ALG)
 
 
 async def parse_jwt_user_data_optional(token: Annotated[str, Depends(oauth2_scheme)]) -> JWTData | None:
@@ -66,5 +65,5 @@ async def validate_admin_access(
 
 
 async def get_current_user(jwt_data: Annotated[JWTData, Depends(parse_jwt_user_data)]) -> UserFromDB:
-    user = await get_user_by_id(jwt_data.user_id)
+    user = await UserService.get_user(id=jwt_data.user_id)
     return user

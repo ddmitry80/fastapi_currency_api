@@ -2,7 +2,7 @@ import datetime
 import re
 from typing import Annotated, Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field
 
 
 print(f"module {__name__} import done")
@@ -37,5 +37,16 @@ class AccessTokenResponse(BaseModel):
     refresh_token: str
 
 
-# class UserResponse(BaseModel):
-#     email: EmailStr
+class UserRefreshTokenFromDB(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    uuid: UUID4
+    user_id: int
+    refresh_token: str
+    expires_at: datetime.datetime
+    created_at: Optional[datetime.datetime]
+    updated_at: Optional[datetime.datetime]
+
+
+class UserResponse(BaseModel):
+    email: EmailStr

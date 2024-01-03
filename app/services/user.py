@@ -24,13 +24,15 @@ logger = logging.getLogger(__name__)
 print(f"module {__name__} import done")
 
 class UserService:
+    @staticmethod
     async def create_user(user: UserCreate, uow: UOWDep) -> UserFromDB | None:
         """Создать пользователя в БД"""
         async with uow:
             user = await uow.user.add_one({'email': user.email, 'password': hash_password(user.password)})
         return user
 
-    async def get_user(self, uow: UOWDep, id: Optional[str] = None, email: Optional[str] = None) -> dict[str, Any] | None:
+    @staticmethod
+    async def get_user(uow: UOWDep, id: Optional[str] = None, email: Optional[str] = None) -> UserFromDB | None:
         """Найти пользователя в БД по id или по email"""
         async with uow:
             filter_by = {}
@@ -40,6 +42,6 @@ class UserService:
                 filter_by['email'] = email
             else:
                 raise ValueError("Не указаны ни поле 'id', ни поле 'email'")
-            user = await uow.user.find_one(**filter_by)
+            user = await uow.user.fetch_one(**filter_by)
         return user
 

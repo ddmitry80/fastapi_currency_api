@@ -10,6 +10,11 @@ engine = create_async_engine(settings.ASYNC_DATABASE_URL)  # создали дв
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession)  # передали наш движок в создатель сессий
 
 
+async def get_async_session():
+    async with async_session_maker() as session:
+        yield session
+
+
 class Base(DeclarativeBase):
     def __str__(self) -> str:
         excludes = [LargeBinary, ]
@@ -28,8 +33,4 @@ class Base(DeclarativeBase):
     def to_pydantic_model(self):
         raise NotImplementedError
 
-
-async def get_async_session():
-    async with async_session_maker() as session:
-        yield session
 
