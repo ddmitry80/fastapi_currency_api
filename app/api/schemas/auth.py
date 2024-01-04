@@ -8,7 +8,8 @@ from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field
 print(f"module {__name__} import done")
 
 # STRONG_PASSWORD_PATTERN = r"^(?=.*[\d])(?=.*[!@#$%^&*])[\w!@#$%^&*]{6,128}$"
-STRONG_PASSWORD_PATTERN = r"^[a-zA-Z\d]+$"
+# STRONG_PASSWORD_PATTERN = r"^[a-zA-Z\d]+$"
+STRONG_PASSWORD_PATTERN = r".*"
 
 class UserCreate(BaseModel):
     email: EmailStr

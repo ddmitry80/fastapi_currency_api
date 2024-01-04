@@ -48,14 +48,16 @@ class UserService:
     
     @staticmethod
     async def insert_mock_data(uow: IUnitOfWork):
-        user1 = User(email='u1@example.com', password=hash_password('Aa1234!'), is_admin=True)
-        user2 = User(email='u2@example.com', password=hash_password('Aa1234!'))
-        print(f"create_ddl: before engine")
+        # user1 = UserCreate(email='u1@example.com', password=hash_password('Aa1234!'), is_admin=True)
+        # user2 = UserCreate(email='u2@example.com', password=hash_password('Aa1234!'))
+        user1 = UserCreate(email='u1@example.com', password='Aa1234!', is_admin=True)
+        user2 = UserCreate(email='u2@example.com', password='Aa1234!')        
         # async with AsyncSession(engine) as session, session.begin():
         #     session.add_all((prod1, prod2, user1, user2))
         async with uow:
-            uow.user.add_one(user1.as_dict())
-            uow.user.add_one(user2.as_dict())
-            uow.commit()
+            logger.debug(f"insert_mock_data: before insert data")
+            await uow.user.add_one(user1)
+            await uow.user.add_one(user2)
+            await uow.commit()
         return None
 
