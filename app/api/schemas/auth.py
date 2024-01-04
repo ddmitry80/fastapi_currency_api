@@ -8,17 +8,23 @@ from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field
 print(f"module {__name__} import done")
 
 # STRONG_PASSWORD_PATTERN = r"^(?=.*[\d])(?=.*[!@#$%^&*])[\w!@#$%^&*]{6,128}$"
-# STRONG_PASSWORD_PATTERN = r"^[a-zA-Z\d]+$"
 STRONG_PASSWORD_PATTERN = r".*"
 
-class UserCreate(BaseModel):
+class CustomModel(BaseModel):
+    def to_log(self):
+        return self.model_dump(mode='json', exclude_none=True)
+    
+
+class UserCreate(CustomModel):
     email: EmailStr
-    # password: Annotated[str, StringConstraints(min_length=6, max_length=128, strip_whitespace=True, pattern=STRONG_PASSWORD_PATTERN)]
     password: str = Field(min_length=6, max_length=128, pattern=STRONG_PASSWORD_PATTERN)
     is_admin: bool = False
 
+    def to_log(self):
+        return self.model_dump(mode='json', exclude_none=True, exclude=['password'])
 
-class UserFromDB(BaseModel):
+
+class UserFromDB(CustomModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: Optional[int]
@@ -26,22 +32,19 @@ class UserFromDB(BaseModel):
     is_admin: Optional[bool] = None
     created_at: datetime.datetime | None = None
     updated_at: datetime.datetime | None = None
- 
-    def to_log(self):
-        return self.model_dump(mode='json', exclude_none=True)
 
 
-class JWTData(BaseModel):
+class JWTData(CustomModel):
     user_id: int = Field(alias="sub")
     is_admin: bool = False
 
 
-class AccessTokenResponse(BaseModel):
+class AccessTokenResponse(CustomModel):
     access_token: str
     refresh_token: str
 
 
-class UserRefreshTokenFromDB(BaseModel):
+class UserRefreshTokenFromDB(CustomModel):
     model_config = ConfigDict(from_attributes=True)
 
     uuid: UUID4
@@ -50,9 +53,6 @@ class UserRefreshTokenFromDB(BaseModel):
     expires_at: datetime.datetime
     created_at: Optional[datetime.datetime] = None
     updated_at: Optional[datetime.datetime] = None
-
-    def to_log(self):
-        return self.model_dump(mode='json', exclude_none=True)
 
 
 class UserResponse(BaseModel):

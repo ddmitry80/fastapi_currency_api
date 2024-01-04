@@ -23,7 +23,7 @@ class UserRepository(Repository):
             logger.debug(f"verify_user: user {user.email} has not verified")
             return None
         result = db_user.to_pydantic_model()
-        logger.debug(f"verify_user: user %s has verified", result.model_dump(mode='json', exclude_none=True))
+        logger.debug(f"verify_user: user=%s has verified", result.to_log())
         return result
     
     async def add_one(self, data: UserCreate) -> UserFromDB:
@@ -33,7 +33,7 @@ class UserRepository(Repository):
         stmt = insert(self.model).values(email=email, password=password, is_admin=is_admin).returning(self.model)
         data = await self.session.execute(stmt)
         result = data.scalar_one().to_pydantic_model()
-        logger.debug(f"update_one: result={result!r}")
+        logger.debug(f"update_one: result={result.to_log()}")
         return result
 
 
