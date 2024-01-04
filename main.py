@@ -2,13 +2,12 @@ import logging
 from logging import config as logging_config
 logging_config.fileConfig('logging.ini')
 
-from app.api.dependencies.db import UOWDep
-from app.db.database import init_db_schema
-from app.services.user import UserService
-
 import uvicorn
 from fastapi import FastAPI
 
+from app.api.dependencies.db import UOWDep
+from app.db.database import init_db_schema
+from app.services.user import UserService
 from app.api.routers.routers import all_routers
 
 logger = logging.getLogger(__name__)
