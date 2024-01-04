@@ -10,7 +10,7 @@ import jwt
 # from src.auth.config import auth_config
 from app.api.endpoints.auth.exceptions import AuthorizationFailed, AuthRequired, InvalidToken
 from app.api.schemas.auth import JWTData, UserFromDB
-from core.config import settings
+from app.core.config import settings
 from app.services.user import UserService
 # from src.auth.service import get_user_by_id
 
@@ -22,14 +22,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/users/tokens", auto_error=F
 def create_access_token(
     *,
     user: dict[str, Any],
-    expires_delta: timedelta = timedelta(minutes=settings.JWT_EXP),
+    expires_delta: timedelta = timedelta(minutes=auth_config.JWT_EXP),
 ) -> str:
     jwt_data = {
         "sub": str(user["user_id"]),
         "exp": datetime.utcnow() + expires_delta,
         "is_admin": user["is_admin"],
     }
-    return jwt.encode(payload=jwt_data, key=AuthConfig.JWT_SECRET, algorithm=auth_config.JWT_ALG)
+    return jwt.encode(payload=jwt_data, key=auth_config.JWT_SECRET, algorithm=auth_config.JWT_ALG)
 
 
 async def parse_jwt_user_data_optional(token: Annotated[str, Depends(oauth2_scheme)]) -> JWTData | None:

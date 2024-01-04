@@ -37,7 +37,7 @@ async def valid_refresh_token(
     if not _is_valid_refresh_token(db_refresh_token):
         raise RefreshTokenNotValid()
     
-    logger.debug("valid_refresh_token: return {db_refresh_token!}")
+    logger.debug("valid_refresh_token: return {db_refresh_token!r}")
     return db_refresh_token
 
 
@@ -49,6 +49,6 @@ async def valid_refresh_token_user(
     user = await UserService.get_user(uow=uow, id=refresh_token.user_id)
     if not user:
         raise RefreshTokenNotValid()
-    logger.debug(f"valid_refresh_token_user: return {user!}")
+    logger.debug(f"valid_refresh_token_user: return {user!r}")
     return user
 

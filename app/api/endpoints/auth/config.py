@@ -1,12 +1,13 @@
 # from pydantic_settings import BaseSettings
-from core.config import Settings
+# from core.config import Settings
+from app.core.config import Settings
 
 
 class AuthConfig(Settings):
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
-        extra = 'ignore'
+    # class Config:
+    #     env_file = '.env'
+    #     env_file_encoding = 'utf-8'
+    #     extra = 'ignore'
         
     JWT_ALG: str
     JWT_SECRET: str

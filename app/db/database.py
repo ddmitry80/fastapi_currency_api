@@ -1,11 +1,12 @@
 from abc import abstractmethod
+import logging
 from sqlalchemy import LargeBinary
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
 
-
+logger = logging.getLogger(__name__)
 engine = create_async_engine(settings.ASYNC_DATABASE_URL)  # создали движок БД
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession)  # передали наш движок в создатель сессий
 
@@ -34,3 +35,9 @@ class Base(DeclarativeBase):
         raise NotImplementedError
 
 
+async def init_db_schema():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        logging.info('drop schema')
+        await conn.run_sync(Base.metadata.create_all)
+    logging.info("init_db_schema: done")
