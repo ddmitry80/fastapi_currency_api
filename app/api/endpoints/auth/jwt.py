@@ -27,7 +27,7 @@ def create_access_token(
     user: UserFromDB,
     expires_delta: timedelta = timedelta(minutes=auth_config.JWT_EXP),
 ) -> str:
-    logger.debug(f"create_access_token: {user!r}")
+    logger.debug(f"create_access_token: user=%s", user.to_log())
     jwt_data = {
         "sub": str(user.id),
         "exp": datetime.utcnow() + expires_delta,

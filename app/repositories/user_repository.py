@@ -20,8 +20,11 @@ class UserRepository(Repository):
         db_data = await self.session.execute(stmt)
         db_user: User = db_data.scalar_one_or_none()
         if not db_user or not check_password(user.password, db_user.password):
+            logger.debug(f"verify_user: user {user.email} has not verified")
             return None
-        return db_user.to_pydantic_model()
+        result = db_user.to_pydantic_model()
+        logger.debug(f"verify_user: user %s has verified", result.model_dump(mode='json', exclude_none=True))
+        return result
     
     async def add_one(self, data: UserCreate) -> UserFromDB:
         """Создание пользователя. Принимает пароль в открытов виде, в БД сохраняет хэш. Возвращает модель Pydentic пользователя"""
@@ -29,8 +32,9 @@ class UserRepository(Repository):
         email, password, is_admin = data.email, hash_password(data.password), data.is_admin
         stmt = insert(self.model).values(email=email, password=password, is_admin=is_admin).returning(self.model)
         data = await self.session.execute(stmt)
-        res = data.scalar_one()
-        return res.to_pydantic_model()
+        result = data.scalar_one().to_pydantic_model()
+        logger.debug(f"update_one: result={result!r}")
+        return result
 
 
 class UserRefreshTokenRepository(Repository):

@@ -23,10 +23,13 @@ class UserFromDB(BaseModel):
 
     id: Optional[int]
     email: EmailStr
-    is_admin: Optional[bool]
-    created_at: Optional[datetime.datetime]
-    updated_at: Optional[datetime.datetime]
-    
+    is_admin: Optional[bool] = None
+    created_at: datetime.datetime | None = None
+    updated_at: datetime.datetime | None = None
+ 
+    def to_log(self):
+        return self.model_dump(mode='json', exclude_none=True)
+
 
 class JWTData(BaseModel):
     user_id: int = Field(alias="sub")
@@ -47,6 +50,9 @@ class UserRefreshTokenFromDB(BaseModel):
     expires_at: datetime.datetime
     created_at: Optional[datetime.datetime] = None
     updated_at: Optional[datetime.datetime] = None
+
+    def to_log(self):
+        return self.model_dump(mode='json', exclude_none=True)
 
 
 class UserResponse(BaseModel):

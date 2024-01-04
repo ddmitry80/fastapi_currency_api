@@ -35,7 +35,7 @@ class Repository(AbstractRepository):
 
     async def add_one(self, data: BaseModel) -> BaseModel:
         """Добавить одну запись в БД (модель Pydentic)"""
-        logger.debug(f"add_one: {data=}")
+        logger.debug(f"add_one: {data!r}")
         stmt = insert(self.model).values(**data.model_dump(exclude_none=True)).returning(self.model)
         data = await self.session.execute(stmt)
         res = data.scalar_one()
@@ -49,16 +49,19 @@ class Repository(AbstractRepository):
     
     async def fetch_one(self, **filter_by: dict) -> BaseModel | None:
         """Получить одну запись, по условию filter_by, или None"""
+        logger.debug(f"fetch_one: {filter_by=}")
         stmt = select(self.model).filter_by(**filter_by)
-        data = await self.session.execute(stmt)
-        result = data.scalar_one_or_none()
-        return result.to_pydantic_model() if result is not None else None
+        data = (await self.session.execute(stmt)).scalar_one_or_none()
+        result = data.to_pydantic_model() if data is not None else None
+        logger.debug(f"fetch_one: result={result!r}")
+        return result
     
     async def update_one(self, data: BaseModel, **where: dict) -> BaseModel:
         """Обновляет одну запись данными из data, по условию where. Если запись не одна, вызывается исключение"""
         logger.debug(f"update_one: {data=}, {where=}")
         stmt = update(self.model).values(**data.model_dump(exclude_none=True)).where(**where).returning(self.model)
         data: CursorResult = await self.session.execute(stmt)
-        result = data.scalar_one()
-        return result.to_pydantic_model()
+        result = data.scalar_one().to_pydantic_model()
+        logger.debug(f"update_one: result={result!r}")
+        return result
 
