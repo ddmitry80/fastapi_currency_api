@@ -14,22 +14,16 @@ from app.api.schemas.auth import UserCreate, UserFromDB
 from app.db.models import User
 from app.utils.unitofwork import IUnitOfWork
 
-# from src import utils
-# from src.auth.config import auth_config
-# from src.auth.exceptions import InvalidCredentials
-# from src.auth.schemas import AuthUser
-# from src.auth.security import check_password, hash_password
-# from src.database import User, Token, execute, fetch_one
 
 logger = logging.getLogger(__name__)
 print(f"module {__name__} import done")
 
 class UserService:
     @staticmethod
-    async def create_user(user: UserCreate, uow: IUnitOfWork) -> UserFromDB | None:
+    async def create_user(uow: IUnitOfWork, user: UserCreate) -> UserFromDB | None:
         """Создать пользователя в БД"""
         async with uow:
-            user = await uow.user.add_one({'email': user.email, 'password': hash_password(user.password)})
+            user = await uow.user.add_one(UserCreate)
         return user
 
     @staticmethod
@@ -47,7 +41,8 @@ class UserService:
         return user
     
     @staticmethod
-    async def insert_mock_data(uow: IUnitOfWork):
+    async def insert_test_data(uow: IUnitOfWork):
+        """Создает тестовые данные пользователя в БД"""
         user1 = UserCreate(email='u1@example.com', password='Aa1234!', is_admin=True)
         user2 = UserCreate(email='u2@example.com', password='Aa1234!')        
         async with uow:

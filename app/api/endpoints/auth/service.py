@@ -1,6 +1,8 @@
 
 from datetime import datetime, timedelta
 import logging
+import random
+import string
 from typing import Any
 from pydantic import UUID4
 import uuid
@@ -14,6 +16,13 @@ from app.services.user import UserService
 from app.utils.unitofwork import IUnitOfWork
 
 logger = logging.getLogger(__name__)
+
+
+ALPHA_NUM = string.ascii_letters + string.digits
+
+def generate_random_alphanum(length: int = 20) -> str:
+    return "".join(random.choices(ALPHA_NUM, k=length))
+
 
 def get_refresh_token_settings(
     refresh_token: str,
@@ -40,8 +49,8 @@ async def create_refresh_token(
     uow: IUnitOfWork, *, user_id: int, refresh_token: str | None = None
 ) -> str:
     if not refresh_token:
-        # refresh_token = utils.generate_random_alphanum(64)
-        refresh_token = uuid.uuid4().__str__()
+        refresh_token = generate_random_alphanum(64)
+        # refresh_token = str(uuid.uuid4())
     async with uow:
         token_data = UserRefreshTokenFromDB(
             uuid=uuid.uuid4(),
@@ -50,12 +59,6 @@ async def create_refresh_token(
             user_id=user_id
         )
         token = await uow.refresh_token.add_one(token_data)
-        # token = await uow.refresh_token.add_one({
-        #     "uuid": uuid.uuid4(),
-        #     "refresh_token": refresh_token,
-        #     "expires_at": datetime.utcnow() + timedelta(seconds=auth_config.REFRESH_TOKEN_EXP),
-        #     "user_id": user_id,
-        # })
         await uow.commit()
         logger.debug(f"create_refresh_token: add token successfully")
     return refresh_token
@@ -68,13 +71,13 @@ async def get_refresh_token(uow: IUnitOfWork, refresh_token: str) -> UserRefresh
 
 
 async def expire_refresh_token(uow: IUnitOfWork, refresh_token_uuid: UUID4) -> None:
+    logger.debug("expire_refresh_token: refresh_token_uuid=%s", refresh_token_uuid)
     async with uow:
-        token = await uow.refresh_token.update_one(
-            data={"expires_at": datetime.utcnow() - timedelta(days=1)}, 
-            uuid=refresh_token_uuid
-            )
+        token_data = await uow.refresh_token.fetch_one(uuid=refresh_token_uuid)
+        token_data.expires_at =  datetime.utcnow() - timedelta(days=1)
+        token = await uow.refresh_token.update_one(token_data, uuid=refresh_token_uuid)
         await uow.commit()
-        logger.debug(f"expire_refresh_token: token expired successfully")
+        logger.debug("expire_refresh_token: token uuid=%s expired successfully", refresh_token_uuid)
 
 
 async def authenticate_user(uow: IUnitOfWork, auth_data: UserCreate) -> UserFromDB:

@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     DB_NAME: str
 
     SITE_DOMAIN: str
+    
+    SECURE_COOKIES: str
+
+    CORS_ORIGINS: list[str]
+    CORS_ORIGINS_REGEX: str | None = None
+    CORS_HEADERS: list[str]
 
     @property
     def ASYNC_DATABASE_URL(self):

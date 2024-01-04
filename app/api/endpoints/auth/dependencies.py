@@ -12,6 +12,7 @@ from app.services.user import UserService
 from app.utils.unitofwork import UnitOfWork
 
 logger = logging.getLogger(__name__)
+print(f"module {__name__} import has done")
 
 
 async def valid_user_create(user: UserCreate) -> UserCreate:
@@ -29,7 +30,7 @@ async def valid_refresh_token(
     uow: UOWDep,
     refresh_token: str = Cookie(..., alias="refreshToken"),
 ) -> UserRefreshTokenFromDB:
-    logger.debug("valid_refresh_token: start")
+    logger.debug("valid_refresh_token: refresh_token=%s", repr(refresh_token))
     # uow = UnitOfWork()
     db_refresh_token = await get_refresh_token(uow, refresh_token)
     if not db_refresh_token:
@@ -46,11 +47,11 @@ async def valid_refresh_token_user(
     uow: UOWDep,
     refresh_token: Annotated[UserRefreshTokenFromDB, Depends(valid_refresh_token)],
 ) -> UserFromDB:
-    logger.debug("valid_refresh_token_user: start")
+    logger.debug("valid_refresh_token_user: refresh_token=%s", repr(refresh_token))
     # uow = UnitOfWork()
     user = await UserService.get_user(uow=uow, id=refresh_token.user_id)
     if not user:
         raise RefreshTokenNotValid()
-    logger.debug(f"valid_refresh_token_user: return {user!r}")
+    logger.debug("valid_refresh_token_user: return user=%s", user.to_log())
     return user
 

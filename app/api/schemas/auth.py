@@ -36,6 +36,7 @@ class UserFromDB(CustomModel):
 
 class JWTData(CustomModel):
     user_id: int = Field(alias="sub")
+    exp: datetime.datetime | None = None
     is_admin: bool = False
 
 
@@ -55,5 +56,5 @@ class UserRefreshTokenFromDB(CustomModel):
     updated_at: Optional[datetime.datetime] = None
 
 
-class UserResponse(BaseModel):
+class UserResponse(CustomModel):
     email: EmailStr

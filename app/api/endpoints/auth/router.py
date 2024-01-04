@@ -7,7 +7,7 @@ from app.api.endpoints.auth.dependencies import valid_refresh_token, valid_refre
 from app.api.endpoints.auth.jwt import create_access_token, parse_jwt_user_data
 from app.api.endpoints.auth.service import authenticate_user, create_refresh_token, expire_refresh_token, get_refresh_token_settings
 
-from app.api.schemas.auth import AccessTokenResponse, JWTData, UserCreate, UserResponse
+from app.api.schemas.auth import AccessTokenResponse, JWTData, UserCreate, UserFromDB, UserRefreshTokenFromDB, UserResponse
 # from app.api.endpoints.auth.service import
 from app.services.user import UserService 
 
@@ -31,8 +31,8 @@ async def get_my_account(uow: UOWDep, jwt_data: JWTData = Depends(parse_jwt_user
 
 
 @router.post("/users/tokens/json", response_model=AccessTokenResponse)
-async def auth_user(auth_data: UserCreate, response: Response, uow: UOWDep) -> AccessTokenResponse:
-    logger.debug(f"auth_user: {auth_data.email=}")
+async def auth_user_json(auth_data: UserCreate, response: Response, uow: UOWDep) -> AccessTokenResponse:
+    logger.info(f"auth_user: {auth_data.email=}")
     user = await authenticate_user(auth_data, uow=uow)
     refresh_token_value = await create_refresh_token(uow=uow, user_id=user["user_id"])
 
@@ -51,13 +51,12 @@ async def auth_user(uow: UOWDep, form_data: Annotated[OAuth2PasswordRequestForm,
     auth_data = UserCreate(email=form_data.username, password=form_data.password)
     user = await authenticate_user(uow, auth_data)
     refresh_token_value = await create_refresh_token(uow, user_id=user.id)
-
+    
+    logger.debug("auth_user: set cookie=%s", get_refresh_token_settings(refresh_token_value))
     response.set_cookie(**get_refresh_token_settings(refresh_token_value))
-
-    return AccessTokenResponse(
-        access_token=create_access_token(user=user),
-        refresh_token=refresh_token_value,
-    )
+    result = AccessTokenResponse(access_token=create_access_token(user=user), refresh_token=refresh_token_value)
+    logger.info(f"auth_user: result={result.to_log()}")
+    return result
 
 
 @router.put("/users/tokens", response_model=AccessTokenResponse)
@@ -65,16 +64,16 @@ async def refresh_tokens(
     uow: UOWDep,
     worker: BackgroundTasks,
     response: Response,
-    refresh_token: dict[str, Any] = Depends(valid_refresh_token),
-    user: dict[str, Any] = Depends(valid_refresh_token_user),
+    refresh_token: Annotated[UserRefreshTokenFromDB, Depends(valid_refresh_token)],
+    user: Annotated[UserFromDB, Depends(valid_refresh_token_user)],
 ) -> AccessTokenResponse:
     refresh_token_value = await create_refresh_token(
         uow=uow,
-        user_id=refresh_token["user_id"]
+        user_id=refresh_token.id
     )
     response.set_cookie(**get_refresh_token_settings(refresh_token_value))
 
-    worker.add_task(expire_refresh_token, uow, refresh_token["uuid"])
+    worker.add_task(expire_refresh_token, uow, refresh_token.uuid)
     return AccessTokenResponse(
         access_token=create_access_token(user=user),
         refresh_token=refresh_token_value,
@@ -84,10 +83,11 @@ async def refresh_tokens(
 @router.delete("/users/tokens")
 async def logout_user(
     response: Response,
-    refresh_token: dict[str, Any] = Depends(valid_refresh_token),
+    refresh_token: Annotated[UserRefreshTokenFromDB, Depends(valid_refresh_token)],
 ) -> None:
-    await expire_refresh_token(refresh_token["uuid"])
+    logger.debug("logout_user: refresh_token=%s", repr(refresh_token))
+    await expire_refresh_token(refresh_token.uuid)
 
     response.delete_cookie(
-        **get_refresh_token_settings(refresh_token["refresh_token"], expired=True)
+        **get_refresh_token_settings(refresh_token.refresh_token, expired=True)
     )
