@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 from typing import Annotated, Any, Optional
 
 from fastapi import Depends
@@ -14,6 +15,7 @@ from app.core.config import settings
 from app.services.user import UserService
 # from src.auth.service import get_user_by_id
 
+logger = logging.getLogger(__name__)
 print(f"module {__name__} import done")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/users/tokens", auto_error=False)
@@ -21,13 +23,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/users/tokens", auto_error=F
 
 def create_access_token(
     *,
-    user: dict[str, Any],
+    # user: dict[str, Any],
+    user: UserFromDB,
     expires_delta: timedelta = timedelta(minutes=auth_config.JWT_EXP),
 ) -> str:
+    logger.debug(f"create_access_token: {user!r}")
     jwt_data = {
-        "sub": str(user["user_id"]),
+        "sub": str(user.id),
         "exp": datetime.utcnow() + expires_delta,
-        "is_admin": user["is_admin"],
+        "is_admin": user.is_admin,
     }
     return jwt.encode(payload=jwt_data, key=auth_config.JWT_SECRET, algorithm=auth_config.JWT_ALG)
 

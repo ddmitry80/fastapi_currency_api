@@ -45,8 +45,8 @@ class UserRefreshTokenFromDB(BaseModel):
     user_id: int
     refresh_token: str
     expires_at: datetime.datetime
-    created_at: Optional[datetime.datetime]
-    updated_at: Optional[datetime.datetime]
+    created_at: Optional[datetime.datetime] = None
+    updated_at: Optional[datetime.datetime] = None
 
 
 class UserResponse(BaseModel):

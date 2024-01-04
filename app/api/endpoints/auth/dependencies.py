@@ -26,10 +26,11 @@ def _is_valid_refresh_token(db_refresh_token: UserRefreshTokenFromDB) -> bool:
 
 
 async def valid_refresh_token(
+    uow: UOWDep,
     refresh_token: str = Cookie(..., alias="refreshToken"),
 ) -> UserRefreshTokenFromDB:
     logger.debug("valid_refresh_token: start")
-    uow = UnitOfWork()
+    # uow = UnitOfWork()
     db_refresh_token = await get_refresh_token(uow, refresh_token)
     if not db_refresh_token:
         raise RefreshTokenNotValid()
@@ -42,10 +43,11 @@ async def valid_refresh_token(
 
 
 async def valid_refresh_token_user(
+    uow: UOWDep,
     refresh_token: Annotated[UserRefreshTokenFromDB, Depends(valid_refresh_token)],
 ) -> UserFromDB:
     logger.debug("valid_refresh_token_user: start")
-    uow = UnitOfWork()
+    # uow = UnitOfWork()
     user = await UserService.get_user(uow=uow, id=refresh_token.user_id)
     if not user:
         raise RefreshTokenNotValid()
