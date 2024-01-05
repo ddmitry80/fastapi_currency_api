@@ -33,7 +33,7 @@ def get_refresh_token_settings(
         "httponly": True,
         "samesite": "none",
         "secure": auth_config.SECURE_COOKIES,
-        "domain": auth_config.SITE_DOMAIN,
+        # "domain": auth_config.SITE_DOMAIN,
     }
     if expired:
         return base_cookie
@@ -80,10 +80,11 @@ async def expire_refresh_token(uow: IUnitOfWork, refresh_token_uuid: UUID4) -> N
         logger.debug("expire_refresh_token: token uuid=%s expired successfully", refresh_token_uuid)
 
 
-async def authenticate_user(uow: IUnitOfWork, auth_data: UserCreate) -> UserFromDB:
+async def verify_user(uow: IUnitOfWork, auth_data: UserCreate) -> UserFromDB:
+    """Проверка верности пользлователя"""
     async with uow:
         user = await uow.user.verify_user(auth_data)
     if not user:
        raise InvalidCredentials() 
-    logger.debug(f"authentificate_user: user {user.email} has got")
+    logger.debug(f"verify_user: user {user.email} has got")
     return user
