@@ -42,11 +42,12 @@ async def env_file(monkeypatch):
 
 # @pytest_asyncio.fixture(scope="session")
 @pytest_asyncio.fixture
-async def async_db_sesstion(env_file):
+async def async_db_sesstion():
     # temp_database_uri = "postgresql+asyncpg://postgres:postgres@localhost:5433/test"
     # engine = create_async_engine(temp_database_uri, echo=True, poolclass=NullPool)
     # async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
-    engine_uri = env_file.ASYNC_DATABASE_URL
+    # engine_uri = env_file.ASYNC_DATABASE_URL
+    engine_uri = settings.ASYNC_DATABASE_URL
     engine = create_async_engine(engine_uri, echo=True, poolclass=NullPool)
     async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
 
