@@ -1,7 +1,6 @@
 import logging
 from logging import config as logging_config
 
-from app.core.config import settings
 logging_config.fileConfig('logging.ini')
 print(f"module {__name__} logging has configured")
 
@@ -9,6 +8,7 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from app.core.config import settings
 from app.api.dependencies.db import UOWDep
 from app.db.database import init_db_schema
 from app.services.user import UserService
@@ -30,11 +30,13 @@ app.add_middleware(
     allow_headers=settings.CORS_HEADERS,
 )
 
+def includer_routers():
+    logger.debug("Инициализация роутов")
+    for router in all_routers:
+        # continue
+        app.include_router(router)
 
-logger.debug("Инициализация роутов")
-for router in all_routers:
-    # continue
-    app.include_router(router)
+includer_routers()
 
 
 @app.get("/")

@@ -1,11 +1,17 @@
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    class Config:
-        env_file = ".env"
-        env_file_encoding = 'utf-8'
-        extra = 'ignore'
+    # class Config:
+    #     env_file = ".env"
+    #     env_file_encoding = 'utf-8'
+    #     extra = 'ignore'
+    model_config = ConfigDict(
+        env_file=".env", 
+        env_file_encoding="utf-8", 
+        extra="ignore",
+        )
 
     DB_HOST: str
     DB_PORT: str
