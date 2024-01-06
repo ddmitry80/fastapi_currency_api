@@ -1,10 +1,11 @@
 import logging
 from logging import config as logging_config
 from httpx import AsyncClient
+from pydantic import ConfigDict
 
 from sqlalchemy import NullPool
-
 from app.api.schemas.auth import UserCreate
+
 logging_config.fileConfig('logging.ini')
 
 import pytest
@@ -12,17 +13,41 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
 from app.services.user import UserService
 from app.utils.unitofwork import IUnitOfWork, UnitOfWork
+from app.core.config import settings, Settings
 from app.db.database import Base
 
 import app.db.database
 
 logger = logging.getLogger(__name__)
 
+# @pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
+async def env_file(monkeypatch):
+    # class MockSettings(Settings):
+    #     model_config = ConfigDict(
+    #         env_file=".test.env", 
+    #         env_file_encoding="utf-8", 
+    #         extra="ignore",
+    #         )
+        
+    mock_settings = Settings(_env_file=".test.env")
+    settings = mock_settings
+    print("mock_settings DB_NAME:", mock_settings.DB_NAME)
 
-@pytest_asyncio.fixture(scope="session")
-async def async_db_sesstion():
-    temp_database_uri = "postgresql+asyncpg://postgres:postgres@localhost:5433/test"
-    engine = create_async_engine(temp_database_uri, echo=True, poolclass=NullPool)
+    monkeypatch.setattr(app.core.config, "settings", mock_settings)
+    monkeypatch.setattr(app.db.database, "settings", mock_settings)
+    print("DB_NAME:", settings.DB_NAME)
+    return settings
+
+
+# @pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
+async def async_db_sesstion(env_file):
+    # temp_database_uri = "postgresql+asyncpg://postgres:postgres@localhost:5433/test"
+    # engine = create_async_engine(temp_database_uri, echo=True, poolclass=NullPool)
+    # async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
+    engine_uri = env_file.ASYNC_DATABASE_URL
+    engine = create_async_engine(engine_uri, echo=True, poolclass=NullPool)
     async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
 
     app.db.database.engine = engine
