@@ -1,7 +1,7 @@
 from typing import List
 import aiohttp
 from app.api.schemas.currencies import CurrencyCreate
-from app.api.schemas.rates import RateCreate
+from app.api.schemas.rates import RateFromAPI
 from app.core.config import settings
 from app.utils.exceptions import ExternalApiException
 
@@ -38,10 +38,10 @@ class NetworkService:
                 currencies.append(CurrencyCreate(code=code, name=name))
             return currencies
 
-    async def fetch_rates(self) -> List[RateCreate]:
+    async def fetch_rates(self) -> List[RateFromAPI]:
         data: dict = await self._fetch_data(self._url_rates)
         if data.get("rates"):
             rates = []
             for currency, rate in data["rates"].items():
-                rates.append(RateCreate(currency=currency, rate=rate))
+                rates.append(RateFromAPI(currency=currency, rate=rate))
             return rates
