@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 test_sqlite.db
 .test.env
+.test.env
