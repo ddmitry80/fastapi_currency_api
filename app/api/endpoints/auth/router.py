@@ -51,6 +51,7 @@ async def auth_user(uow: UOWDep, form_data: Annotated[OAuth2PasswordRequestForm,
     username, password = form_data.username, form_data.password
     logger.debug(f"auth_user: {username=}")
     auth_data = UserCreate(email=form_data.username, password=form_data.password)
+    print(f"auth_user: auth_data={auth_data.to_log()}")
     user = await verify_user(uow, auth_data)
     refresh_token_value = await create_refresh_token(uow, user_id=user.id)
     

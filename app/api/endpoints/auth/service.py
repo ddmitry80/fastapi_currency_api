@@ -82,6 +82,7 @@ async def expire_refresh_token(uow: IUnitOfWork, refresh_token_uuid: UUID4) -> N
 
 async def verify_user(uow: IUnitOfWork, auth_data: UserCreate) -> UserFromDB:
     """Проверка верности пользлователя"""
+    print(f"verify_user: auth_data={auth_data.to_log()}")
     async with uow:
         user = await uow.user.verify_user(auth_data)
     if not user:

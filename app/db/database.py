@@ -7,7 +7,7 @@ from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
-engine = create_async_engine(settings.ASYNC_DATABASE_URL)  # создали движок БД
+engine = create_async_engine(settings.ASYNC_DATABASE_URL, echo=True)  # создали движок БД
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession)  # передали наш движок в создатель сессий
 
 

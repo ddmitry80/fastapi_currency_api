@@ -16,13 +16,16 @@ class UserRepository(Repository):
     async def verify_user(self, user: UserCreate) -> Optional[UserFromDB]:
         """Проверка совпадения имени пользователя/пароля. Возвращает данные пользователя из БД"""
         logger.debug(f"verify_user: {user!r}")
+        print(f"UserRepository.verify_user: user={user.to_log()}")
         stmt = select(self.model).filter_by(email=user.email)
         db_data = await self.session.execute(stmt)
+        print(f"UserRepository.verify_user: db_data has got")
         db_user: User = db_data.scalar_one_or_none()
         if not db_user or not check_password(user.password, db_user.password):
             logger.debug(f"verify_user: user {user.email} has not verified")
             return None
         result = db_user.to_pydantic_model()
+        print(f"UserRepository.verify_user: result={result.to_log()}")
         logger.debug(f"verify_user: user=%s has verified", result.to_log())
         return result
     
