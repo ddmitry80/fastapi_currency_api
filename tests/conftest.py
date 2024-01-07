@@ -21,7 +21,7 @@ def anyio_backend():
 
 
 @pytest.fixture(scope="session")
-async def client() -> AsyncGenerator[TestClient, None]:
+async def client() -> AsyncGenerator[AsyncClient, None]:
     host, port = "127.0.0.1", "9000"
 
     async with AsyncClient(app=app, base_url=f"http://{host}:{port}") as ac:
