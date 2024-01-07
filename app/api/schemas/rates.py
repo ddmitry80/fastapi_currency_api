@@ -5,9 +5,14 @@ from pydantic import ConfigDict
 from app.api.schemas.custom_model import CustomModel
 
 
-class RateCreate(CustomModel):
+class RateFromAPI(CustomModel):
     rate: float
     currency: str
+
+
+class RateCreate(CustomModel):
+    rate: float
+    currency_id: int
 
 
 class RateFromDB(CustomModel):
