@@ -3,6 +3,7 @@ import logging
 from typing import Type
 
 from app.db.database import async_session_maker
+from app.repositories.currency_repository import CurrencyRepository
 from app.repositories.user_repository import UserRefreshTokenRepository, UserRepository
 
 logger = logging.getLogger(__name__)
@@ -10,6 +11,7 @@ logger = logging.getLogger(__name__)
 class IUnitOfWork(ABC):
     user: Type[UserRepository]
     refresh_token: Type[UserRefreshTokenRepository]
+    currency: Type[CurrencyRepository]
 
     @abstractmethod
     def __init__(self):
@@ -42,6 +44,7 @@ class UnitOfWork(IUnitOfWork):
 
         self.user = UserRepository(self.session)
         self.refresh_token = UserRefreshTokenRepository(self.session)
+        self.currency = CurrencyRepository(self.session)
 
     async def __aexit__(self, *args):
         await self.rollback()
