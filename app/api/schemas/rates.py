@@ -18,3 +18,11 @@ class RateFromDB(CustomModel):
     rate: float
     created_at: datetime.datetime | None = None
     updated_at: datetime.datetime | None = None
+
+
+class RatesLastUpdateResponse(CustomModel):
+    updated_at: datetime.datetime | None
+
+
+class RatesUpdateStatus(RatesLastUpdateResponse):
+    status: bool
