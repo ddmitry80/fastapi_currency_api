@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS_REGEX: str | None = None
     CORS_HEADERS: list[str]
 
+    MODE: str
+
     @property
     def ASYNC_DATABASE_URL(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

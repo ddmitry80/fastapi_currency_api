@@ -43,22 +43,19 @@ async def env_file(monkeypatch):
 # @pytest_asyncio.fixture(scope="session")
 @pytest_asyncio.fixture
 async def async_db_sesstion():
-    # temp_database_uri = "postgresql+asyncpg://postgres:postgres@localhost:5433/test"
-    # engine = create_async_engine(temp_database_uri, echo=True, poolclass=NullPool)
-    # async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
-    # engine_uri = env_file.ASYNC_DATABASE_URL
-    engine_uri = settings.ASYNC_DATABASE_URL
-    engine = create_async_engine(engine_uri, echo=True, poolclass=NullPool)
-    async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
+    if settings.MODE == 'TEST':
+        engine_uri = settings.ASYNC_DATABASE_URL
+        engine = create_async_engine(engine_uri, echo=True, poolclass=NullPool)
+        async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
 
-    app.db.database.engine = engine
-    app.db.database.async_session_maker = async_session_maker
+        app.db.database.engine = engine
+        app.db.database.async_session_maker = async_session_maker
 
-    await app.db.database.init_db_schema()
-    print(f"async_db_sesstion: init db schema done")
+        await app.db.database.init_db_schema()
+        print(f"async_db_sesstion: init db schema done")
 
-    yield async_session_maker
-    # Base.metadata.drop_all(engine, checkfirst=True)
+        yield async_session_maker
+        # Base.metadata.drop_all(engine, checkfirst=True)
 
 
 # @pytest.mark.anyio
