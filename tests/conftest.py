@@ -7,7 +7,6 @@ import pytest_asyncio
 
 from main import app, includer_routers
 
-
 # @pytest.fixture(autouse=True, scope="session")
 # def run_migrations() -> None:
 #     import os
@@ -18,15 +17,15 @@ from main import app, includer_routers
 #     os.system("alembic downgrade base")
 
 
-# @pytest.fixture(scope="session")
-# def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
-#     loop = asyncio.get_event_loop_policy().new_event_loop()
-#     yield loop
-#     loop.close()
+@pytest.fixture(scope="session")
+def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 
 # @pytest.mark.asyncio
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture()
 async def client() -> AsyncGenerator[TestClient, None]:
     host, port = "127.0.0.1", "9000"
     scope = {"client": (host, port)}
