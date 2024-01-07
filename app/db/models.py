@@ -6,6 +6,8 @@ from pydantic import UUID4
 from sqlalchemy import UUID, BigInteger, Boolean, DateTime, ForeignKey, LargeBinary, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.api.schemas.auth import JWTData, UserFromDB, UserRefreshTokenFromDB
+from app.api.schemas.currencies import CurrencyFromDB
+from app.api.schemas.rates import RateFromDB
 
 from app.db.database import Base
 
@@ -43,3 +45,35 @@ class UserRefreshToken(Base):
 
     def to_pydantic_model(self) -> UserFromDB:
         return UserRefreshTokenFromDB.model_validate(self)
+    
+
+class Currency(Base):
+    __tablename__ = "currency"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(String(10), unique=True, nullable=False)
+
+    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime, onupdate=func.now(), nullable=True)
+
+    rates: Mapped[List[Rate]] = relationship("Rate", back_populates="currency")
+
+    def to_pydantic_model(self) -> CurrencyFromDB:
+        return CurrencyFromDB.model_validate(self)
+
+
+class Rate(Base):
+    __tablename__ = "rate"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
+    currency_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Currency.id, ondelete='CASCADE'), nullable=False)
+    rate: Mapped[float]
+
+    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime, onupdate=func.now(), nullable=True)
+
+    currency: Mapped[Currency] = relationship(Currency, back_populates="rates")
+
+    def to_pydantic_model(self):
+        return RateFromDB.model_validate(self)

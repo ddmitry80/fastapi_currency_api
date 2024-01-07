@@ -2,18 +2,15 @@ import datetime
 import re
 from typing import Annotated, Optional
 
-from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field
+from pydantic import UUID4, ConfigDict, EmailStr, Field
+
+from app.api.schemas.custom_model import CustomModel
 
 
 print(f"module {__name__} import done")
 
 # STRONG_PASSWORD_PATTERN = r"^(?=.*[\d])(?=.*[!@#$%^&*])[\w!@#$%^&*]{6,128}$"
 STRONG_PASSWORD_PATTERN = r".*"
-
-class CustomModel(BaseModel):
-    def to_log(self):
-        return self.model_dump(mode='json', exclude_none=True)
-    
 
 class UserCreate(CustomModel):
     email: EmailStr
