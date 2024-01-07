@@ -3,10 +3,6 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # class Config:
-    #     env_file = ".env"
-    #     env_file_encoding = 'utf-8'
-    #     extra = 'ignore'
     model_config = ConfigDict(
         env_file=".env", 
         env_file_encoding="utf-8", 
@@ -26,6 +22,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str]
     CORS_ORIGINS_REGEX: str | None = None
     CORS_HEADERS: list[str]
+
+    EXCHANGE_API_KEY: str
 
     MODE: str
 
