@@ -1,5 +1,5 @@
 import logging
-import app.utils.logging
+import app.utils.logging_init
 
 import uvicorn
 from fastapi import FastAPI
