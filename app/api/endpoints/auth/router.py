@@ -20,7 +20,9 @@ router = APIRouter(
 
 @router.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 async def register_user(uow: UOWDep, auth_data: Annotated[UserCreate, Depends(valid_user_create)]) -> UserResponse:
-    user = await UserService.create_user(user=auth_data, uow=uow)
+    # print(f"register_user: {auth_data!r}")
+    logger.debug("register_user: auth_data=%s", auth_data.to_log())
+    user = await UserService.create_user(uow=uow, user=auth_data)
     return {"email": user.email}
 
 

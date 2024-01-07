@@ -22,13 +22,15 @@ class UserService:
     @staticmethod
     async def create_user(uow: IUnitOfWork, user: UserCreate) -> UserFromDB | None:
         """Создать пользователя в БД"""
+        logger.debug("create_user: user=%s", user.to_log())
         async with uow:
-            user = await uow.user.add_one(UserCreate)
+            user = await uow.user.add_one(user)
         return user
 
     @staticmethod
     async def get_user(uow: IUnitOfWork, id: Optional[str] = None, email: Optional[str] = None) -> UserFromDB | None:
         """Найти пользователя в БД по id или по email"""
+        logger.debug("get_user: id=%s, email=%s", id, email)
         async with uow:
             filter_by = {}
             if id: 
@@ -43,6 +45,7 @@ class UserService:
     @staticmethod
     async def insert_test_data(uow: IUnitOfWork):
         """Создает тестовые данные пользователя в БД"""
+        logger.debug("insert_test_data")
         user1 = UserCreate(email='u1@example.com', password='Aa1234!', is_admin=True)
         user2 = UserCreate(email='u2@example.com', password='Aa1234!')        
         async with uow:

@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 print(f"module {__name__} import has done")
 
 
-async def valid_user_create(user: UserCreate) -> UserCreate:
-    if await UserService.get_user(email=user.email):
+async def valid_user_create(uow: UOWDep, user: UserCreate) -> UserCreate:
+    logger.debug("valid_user_create: user=%s", user.to_log())
+    if await UserService.get_user(uow, email=user.email):
         raise EmailTaken()
 
     return user

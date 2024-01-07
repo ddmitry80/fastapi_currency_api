@@ -45,7 +45,8 @@ async def env_file(monkeypatch):
 async def async_db_sesstion():
     if settings.MODE == 'TEST':
         engine_uri = settings.ASYNC_DATABASE_URL
-        engine = create_async_engine(engine_uri, echo=True, poolclass=NullPool)
+        # engine = create_async_engine(engine_uri, echo=True, poolclass=NullPool)
+        engine = create_async_engine(engine_uri, echo=True)
         async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
 
         app.db.database.engine = engine
@@ -62,7 +63,8 @@ async def async_db_sesstion():
 @pytest_asyncio.fixture()
 async def mock_uow(async_db_sesstion) -> UnitOfWork:
 
-    uow = UnitOfWork(session_factory=async_db_sesstion)
+    uow = UnitOfWork()
+    uow.session_factory = async_db_sesstion
 
     print(f"UnitOfWork: init done")
 
@@ -83,5 +85,6 @@ class TestDBIntegration:
 
     async def test_create_user(self, mock_uow: UnitOfWork, client: AsyncClient):
         new_user = UserCreate(email="test@example.com", password="A12345a!")
-        response = await client.post('/auth/users', json=new_user.to_log())
+        response = await client.post('/auth/users', json=new_user.model_dump())
+        print("response.json():", response.json())
         assert response.json()["email"] == new_user.email

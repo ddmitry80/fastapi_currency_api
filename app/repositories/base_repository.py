@@ -56,7 +56,7 @@ class Repository(AbstractRepository):
         stmt = select(self.model).filter_by(**filter_by)
         data = (await self.session.execute(stmt)).scalar_one_or_none()
         result = data.to_pydantic_model() if data is not None else None
-        logger.debug(f"fetch_one: result={result.to_log()}")
+        logger.debug(f"fetch_one: result={result.to_log() if result else None}")
         return result
     
     async def update_one(self, data: BaseModel, **where: dict) -> BaseModel:
