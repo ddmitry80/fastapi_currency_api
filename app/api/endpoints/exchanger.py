@@ -25,11 +25,16 @@ async def update_rates(uow: UOWDep) -> RatesUpdateStatus:
     rates_list: List[RateFromAPI] = await NetworkService().fetch_rates()
     updated_at=datetime.datetime.utcnow()
 
-    currencies_added = await CurrencyService.refresh_list(currencies_list)
-    rates_refreshed = await RateService.add_list(rates_list)
+    print(f"{currencies_list=}")
+    print(f"{rates_list=}")
+
+    currencies_added = await CurrencyService.refresh_list(uow=uow, currencies_list=currencies_list)
+    rates_refreshed = await RateService.add_list(uow=uow, rates_list=rates_list)
+
+    refresh_status = True if rates_refreshed > 0 else False
     
     response = RatesUpdateStatus(
-        status=True, 
+        status=refresh_status, 
         updated_at=updated_at, 
         currencies_added=currencies_added, 
         rates_refreshed=rates_refreshed

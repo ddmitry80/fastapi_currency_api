@@ -7,7 +7,7 @@ from app.utils.exceptions import ExternalApiException
 
 class NetworkService:
     def __init__(self):
-        self.base_url = "http://exchangeratesapi.io/v1/"
+        self.base_url = "http://api.exchangeratesapi.io/v1/"
         self.path_currencies = "symbols"
         self.path_rates = "latest"
         self.api_key = settings.EXCHANGE_API_KEY

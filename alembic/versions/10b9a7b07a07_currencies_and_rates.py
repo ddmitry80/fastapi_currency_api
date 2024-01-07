@@ -27,8 +27,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('code'),
-    sa.UniqueConstraint('name')
+    sa.UniqueConstraint('code')
     )
     op.create_index(op.f('ix_currency_id'), 'currency', ['id'], unique=False)
     op.create_table('rate',

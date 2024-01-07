@@ -6,27 +6,33 @@ from app.utils.unitofwork import IUnitOfWork
 logger = logging.getLogger(__name__)
 
 class CurrencyService:
-    async def add_currency(self, uow: IUnitOfWork, currency: CurrencyCreate) -> int:
-        currency_dict: dict = currency.model_dump()
+    @staticmethod
+    async def add_currency(uow: IUnitOfWork, currency: CurrencyCreate) -> int:
+        # currency_dict: dict = currency.model_dump()
         async with uow:
-            currency_from_db = await uow.currency.add_one(currency_dict)
+            currency_from_db = await uow.currency.add_one(currency)
             await uow.commit()
-            return currency_from_db.id
+        return currency_from_db.id
 
-    async def get_currency(self, uow: IUnitOfWork, code: str) -> CurrencyFromDB:
+    @staticmethod
+    async def get_currency(uow: IUnitOfWork, code: str) -> CurrencyFromDB:
         async with uow:
             currency = await uow.currency.fetch_one(code=code)
             return currency
 
-    async def refresh_list(self, uow: IUnitOfWork, currencies_list: List[CurrencyCreate]) -> int:
+    @staticmethod
+    async def refresh_list(uow: IUnitOfWork, currencies_list: List[CurrencyCreate]) -> int:
         """Обновляет список валют в БД, возвращает количество добавленных валют"""
         counter = 0
         async with uow:
             for currency in currencies_list:
-                curr = await uow.currency.fetch_one(code=currency.code)
+                curr = await uow.currency.fetch_one(name=currency.name, code=currency.code)
                 if curr is None:
                     curr = await uow.currency.add_one(currency)
                     counter += 1
+                    print(f"added_currency: {curr!r}, {counter=}")
+                else:
+                    print(f"found currency: {curr!r}")
             await uow.commit()
         if counter > 0:
             logger.info("CurrencyService.refresh_list: added %s currencies", counter)

@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class RateService:
-    async def add_rate(self, uow: IUnitOfWork, rate: RateFromAPI) -> int | None:
+    @staticmethod
+    async def add_rate(uow: IUnitOfWork, rate: RateFromAPI) -> int | None:
         rate_dict: dict = rate.model_dump()
         async with uow:
             currency: CurrencyFromDB = await uow.currency.fetch_one(code=rate.currency)
@@ -22,15 +23,17 @@ class RateService:
             await uow.commit()
         return rate_from_db
 
-    async def get_rate(self, uow: IUnitOfWork, code: str) -> RateFromDB:
+    @staticmethod
+    async def get_rate(uow: IUnitOfWork, code: str) -> RateFromDB:
         async with uow:
             rate = await uow.rate.find_one(code=code)
         return rate
 
-    async def add_list(self, uow: IUnitOfWork, rates_list: List[RateFromAPI]) -> int:
+    @staticmethod
+    async def add_list(uow: IUnitOfWork, rates_list: List[RateFromAPI]) -> int:
         counter = 0
         for rate in rates_list:
-            rate_from_db = await RateService().add_rate(uow, rate)
+            rate_from_db = await RateService.add_rate(uow, rate)
             if rate_from_db:
                 counter += 1
         
