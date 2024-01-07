@@ -55,7 +55,7 @@ class Currency(Base):
     code: Mapped[str] = mapped_column(String(10), unique=True, nullable=False)
 
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, onupdate=func.now(), nullable=True)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     rates: Mapped[List[Rate]] = relationship("Rate", back_populates="currency")
 
@@ -71,7 +71,7 @@ class Rate(Base):
     rate: Mapped[float]
 
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, onupdate=func.now(), nullable=True)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     currency: Mapped[Currency] = relationship(Currency, back_populates="rates")
 

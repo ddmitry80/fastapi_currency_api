@@ -6,7 +6,6 @@ from app.api.schemas.custom_model import CustomModel
 
 
 class RateCreate(CustomModel):
-    updated_at: datetime.datetime
     rate: float
     currency: str
 
