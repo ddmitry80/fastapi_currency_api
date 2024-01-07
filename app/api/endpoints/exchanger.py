@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import List
 from fastapi import APIRouter
 from app.api.dependencies.db import UOWDep
@@ -9,6 +10,8 @@ from app.services.currency import CurrencyService
 from app.services.network import NetworkService
 from app.services.rate import RateService
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/api",
@@ -22,7 +25,14 @@ async def update_rates(uow: UOWDep) -> RatesUpdateStatus:
     rates_list: List[RateFromAPI] = await NetworkService().fetch_rates()
     updated_at=datetime.datetime.utcnow()
 
-    await CurrencyService.refresh_list(currencies_list)
-    await RateService.add_list(rates_list)
+    currencies_added = await CurrencyService.refresh_list(currencies_list)
+    rates_refreshed = await RateService.add_list(rates_list)
     
-    return RatesUpdateStatus(status=True, updated_at=updated_at)
+    response = RatesUpdateStatus(
+        status=True, 
+        updated_at=updated_at, 
+        currencies_added=currencies_added, 
+        rates_refreshed=rates_refreshed
+        )
+    logger.debug("update_rates: response=%s", response.to_log())
+    return response

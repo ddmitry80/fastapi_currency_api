@@ -31,3 +31,5 @@ class RatesLastUpdateResponse(CustomModel):
 
 class RatesUpdateStatus(RatesLastUpdateResponse):
     status: bool
+    currencies_added: int | None = None
+    rates_refreshed: int | None = None
