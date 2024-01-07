@@ -57,6 +57,8 @@ async def async_db_sesstion():
 
         yield async_session_maker
         # Base.metadata.drop_all(engine, checkfirst=True)
+    else:
+        raise ValueError("Настройки не в TEST режиме: смотри .env и .test.env")
 
 
 # @pytest.mark.anyio
@@ -88,3 +90,5 @@ class TestDBIntegration:
         response = await client.post('/auth/users', json=new_user.model_dump())
         print("response.json():", response.json())
         assert response.json()["email"] == new_user.email
+
+    async def test_login(self, mock_uow: UnitOfWork, client: AsyncClient):
