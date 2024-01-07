@@ -1,4 +1,4 @@
-from app.api.endpoints.auth.constants import ErrorCode
+from app.auth.constants import ErrorCode
 from app.utils.exceptions import BadRequest, NotAuthenticated, PermissionDenied
 
 

@@ -5,8 +5,8 @@ from typing import Annotated, Any
 from fastapi import Cookie
 from fastapi.params import Depends
 from app.api.dependencies.db import UOWDep
-from app.api.endpoints.auth.exceptions import EmailTaken, RefreshTokenNotValid
-from app.api.endpoints.auth.service import get_refresh_token
+from app.auth.exceptions import EmailTaken, RefreshTokenNotValid
+from app.auth.service import get_refresh_token
 from app.api.schemas.auth import UserCreate, UserFromDB, UserRefreshTokenFromDB
 from app.services.user import UserService
 from app.utils.unitofwork import UnitOfWork

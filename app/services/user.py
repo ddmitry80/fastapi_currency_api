@@ -6,10 +6,10 @@ import logging
 from pydantic import UUID4
 from sqlalchemy import insert, select, update
 from app.api.dependencies.db import UOWDep
-from app.api.endpoints.auth.config import AuthConfig
-from app.api.endpoints.auth.exceptions import InvalidCredentials
+from app.auth.config import AuthConfig
+from app.auth.exceptions import InvalidCredentials
 
-from app.api.endpoints.auth.security import check_password, hash_password
+from app.auth.security import check_password, hash_password
 from app.api.schemas.auth import UserCreate, UserFromDB
 from app.db.models import User
 from app.utils.unitofwork import IUnitOfWork

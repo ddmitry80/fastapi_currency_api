@@ -3,9 +3,9 @@ from typing import Annotated, Any
 from fastapi import APIRouter, BackgroundTasks, Depends, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from app.api.dependencies.db import UOWDep
-from app.api.endpoints.auth.dependencies import valid_refresh_token, valid_refresh_token_user, valid_user_create
-from app.api.endpoints.auth.jwt import create_access_token, parse_jwt_user_data
-from app.api.endpoints.auth.service import verify_user, create_refresh_token, expire_refresh_token, get_refresh_token_settings
+from app.auth.dependencies import valid_refresh_token, valid_refresh_token_user, valid_user_create
+from app.auth.jwt import create_access_token, parse_jwt_user_data
+from app.auth.service import verify_user, create_refresh_token, expire_refresh_token, get_refresh_token_settings
 
 from app.api.schemas.auth import AccessTokenResponse, JWTData, UserCreate, UserFromDB, UserRefreshTokenFromDB, UserResponse
 # from app.api.endpoints.auth.service import

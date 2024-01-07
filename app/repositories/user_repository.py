@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 from pydantic import BaseModel
 from sqlalchemy import insert, select
-from app.api.endpoints.auth.security import check_password, hash_password
+from app.auth.security import check_password, hash_password
 from app.api.schemas.auth import UserCreate, UserFromDB
 from app.repositories.base_repository import Repository, AbstractRepository
 from app.db.models import User, UserRefreshToken

@@ -4,12 +4,12 @@ from typing import Annotated, Any, Optional
 
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
-from app.api.endpoints.auth.config import AuthConfig, auth_config
+from app.auth.config import AuthConfig, auth_config
 # from jose import JWTError, jwt
 import jwt
 
 # from src.auth.config import auth_config
-from app.api.endpoints.auth.exceptions import AuthorizationFailed, AuthRequired, InvalidToken
+from app.auth.exceptions import AuthorizationFailed, AuthRequired, InvalidToken
 from app.api.schemas.auth import JWTData, UserFromDB
 from app.core.config import settings
 from app.services.user import UserService
