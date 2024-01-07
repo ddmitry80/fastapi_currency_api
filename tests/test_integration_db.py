@@ -10,7 +10,6 @@ from app.api.schemas.auth import UserCreate
 logging_config.fileConfig('logging.ini')
 
 import pytest
-import pytest_asyncio
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
 from app.services.user import UserService
 from app.utils.unitofwork import IUnitOfWork, UnitOfWork
@@ -21,8 +20,9 @@ import app.db.database
 
 logger = logging.getLogger(__name__)
 
+# pytestmark = pytest.mark.anyio
 
-@pytest_asyncio.fixture
+@pytest.fixture(scope="session")
 async def env_file(monkeypatch):
     mock_settings = Settings(_env_file=".test.env")
     settings = mock_settings
@@ -34,7 +34,7 @@ async def env_file(monkeypatch):
     return settings
 
 
-@pytest_asyncio.fixture
+@pytest.fixture(scope="session")
 async def async_db_sesstion():
     if settings.MODE == 'TEST':
         engine_uri = settings.ASYNC_DATABASE_URL
@@ -55,8 +55,8 @@ async def async_db_sesstion():
         raise ValueError("Настройки не в TEST режиме: смотри .env и .test.env")
 
 
-@pytest.mark.asyncio
-@pytest_asyncio.fixture()
+
+@pytest.fixture(scope="session")
 async def mock_uow(async_db_sesstion) -> UnitOfWork:
 
     uow = UnitOfWork()
@@ -70,7 +70,7 @@ async def mock_uow(async_db_sesstion) -> UnitOfWork:
         yield uow
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 class TestDBIntegration:
     async def test_read_user(self, mock_uow: UnitOfWork, client: AsyncClient):
         user = await mock_uow.user.fetch_one(id=1)
