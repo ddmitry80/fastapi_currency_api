@@ -1,8 +1,5 @@
 import logging
-from logging import config as logging_config
-
-logging_config.fileConfig('logging.ini')
-print(f"module {__name__} logging has configured")
+import app.utils.logging
 
 import uvicorn
 from fastapi import FastAPI
