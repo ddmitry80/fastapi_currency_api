@@ -49,7 +49,8 @@ async def async_db_sesstion():
         print(f"async_db_sesstion: init db schema done")
 
         yield async_session_maker
-        # Base.metadata.drop_all(engine, checkfirst=True)
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
     else:
         raise ValueError("Настройки не в TEST режиме: смотри .env и .test.env")
 
