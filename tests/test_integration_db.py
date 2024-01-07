@@ -92,3 +92,9 @@ class TestDBIntegration:
         assert response.json()["email"] == new_user.email
 
     async def test_login(self, mock_uow: UnitOfWork, client: AsyncClient):
+        auth_data = UserCreate(email='u2@example.com', password='Aa1234!')
+        auth_body = {"username": auth_data.email, "password": auth_data.password}
+        headers = { 'Content-Type': 'application/x-www-form-urlencoded'}
+        response = await client.post("/auth/users/tokens", data=auth_body, headers=headers)
+        print("response.json():", response.json())
+        assert response.json()["email"] == auth_data.email
