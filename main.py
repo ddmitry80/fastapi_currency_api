@@ -43,11 +43,13 @@ async def read_root():
 
 @app.get("/healthcheck", include_in_schema=True)
 async def healthcheck() -> dict[str, str]:
+    logger.debug("healthcheck: run")
     return {"status": "ok"}
 
 
 @app.get('/create_ddl')
 async def create_ddl(uow: UOWDep):
+    logger.debug("create_ddl: run")
     await init_db_schema()
     await UserService.insert_test_data(uow=uow)
     logger.info(f"create_ddl: ok")
