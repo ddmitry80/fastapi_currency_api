@@ -3,6 +3,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, BackgroundTasks, Depends, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from app.api.dependencies.db import UOWDep
+from app.api.dependencies.auth import GetAuthenticatedUser
 from app.auth.dependencies import valid_refresh_token, valid_refresh_token_user, valid_user_create
 from app.auth.jwt import create_access_token, parse_jwt_user_data
 from app.auth.service import verify_user, create_refresh_token, expire_refresh_token, get_refresh_token_settings
@@ -26,11 +27,11 @@ async def register_user(uow: UOWDep, auth_data: Annotated[UserCreate, Depends(va
     return {"email": user.email}
 
 
-@router.get("/users/me", response_model=UserResponse)
-async def get_my_account(uow: UOWDep, jwt_data: Annotated[JWTData, Depends(parse_jwt_user_data)]) -> UserResponse:
-    user = await UserService.get_user(uow=uow, id=jwt_data.user_id)
-    return {"email": user.email}
-
+@router.get("/users/me")
+async def get_my_account(uow: UOWDep, user: GetAuthenticatedUser) -> UserResponse:
+    result = UserResponse(email=user.email)
+    logger.debug("get_my_account: result=%s", result.to_log())
+    return result
 
 @router.post("/users/tokens/json", response_model=AccessTokenResponse)
 async def auth_user_json(auth_data: UserCreate, response: Response, uow: UOWDep) -> AccessTokenResponse:

@@ -4,6 +4,7 @@ from typing import Annotated, Any, Optional
 
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
+from app.api.dependencies.db import UOWDep
 from app.auth.config import AuthConfig, auth_config
 # from jose import JWTError, jwt
 import jwt
@@ -68,6 +69,6 @@ async def validate_admin_access(
     return
 
 
-async def get_current_user(jwt_data: Annotated[JWTData, Depends(parse_jwt_user_data)]) -> UserFromDB:
-    user = await UserService.get_user(id=jwt_data.user_id)
+async def get_current_user(uow: UOWDep, jwt_data: Annotated[JWTData, Depends(parse_jwt_user_data)]) -> UserFromDB:
+    user = await UserService.get_user(uow=uow, id=jwt_data.user_id)
     return user
