@@ -1,6 +1,7 @@
 import logging
 from typing import List
-from app.api.schemas.currencies import CurrencyCreate, CurrencyFromDB
+from app.api.schemas.currencies import ConvertedCurrencies, CurrenciesToExchange, CurrencyCreate, CurrencyFromDB
+from app.utils.exceptions import BadCurrencyCode, CurrencyZeroRate
 from app.utils.unitofwork import IUnitOfWork
 
 logger = logging.getLogger(__name__)
@@ -39,3 +40,24 @@ class CurrencyService:
         else:
             logger.debug("CurrencyService.refresh_list: no new currencies")
         return counter
+    
+    @staticmethod
+    async def convert_currencies(uow: IUnitOfWork, currencies_to_exchange: CurrenciesToExchange) -> ConvertedCurrencies:
+        async with uow:
+            from_rate = await uow.rate.find_latest_rate(code=currencies_to_exchange.from_currency_code)
+            to_rate = await uow.rate.find_latest_rate(code=currencies_to_exchange.to_currency_code)
+        if from_rate and to_rate:
+            if from_rate.rate == 0:
+                raise CurrencyZeroRate
+            value = to_rate.rate / from_rate.rate * currencies_to_exchange.count
+        else:
+            raise BadCurrencyCode
+        
+        result = ConvertedCurrencies(
+            from_currency_code=currencies_to_exchange.from_currency_code,
+            to_currency_code=currencies_to_exchange.to_currency_code,
+            count=currencies_to_exchange.count,
+            value=value
+        )
+        logger.debug("CurrencyService.convert_currencies: result=%s", result.to_log())
+        return result

@@ -3,7 +3,7 @@ import logging
 from typing import List
 from fastapi import APIRouter
 from app.api.dependencies.db import UOWDep
-from app.api.schemas.currencies import CurrencyCreate
+from app.api.schemas.currencies import ConvertedCurrencies, CurrenciesToExchange, CurrencyCreate
 
 from app.api.schemas.rates import RateFromAPI, RatesLastUpdateResponse, RatesUpdateStatus
 from app.services.currency_service import CurrencyService
@@ -50,3 +50,9 @@ async def get_last_update_datetime(uow: UOWDep) -> RatesLastUpdateResponse:
 
     logger.debug("get_last_update_datetime: result=%s", result.to_log())
     return result
+
+
+@router.post("/convert")
+async def convert_currencies(uow: UOWDep, currencies_to_exchange: CurrenciesToExchange) -> ConvertedCurrencies:
+    converted_currencies = await CurrencyService.convert_currencies(uow, currencies_to_exchange)
+    return converted_currencies
