@@ -12,6 +12,7 @@ docker run --name postgres_s_course_proj_test -p 5433:5432 -e POSTGRESS_USER=pos
 
 # Currency Data API
 https://exchangeratesapi.io/
+https://exchangeratesapi.io/documentation/
 https://apilayer.com/marketplace/currency_data-api#documentation-tab
 
 # Миграция БД
