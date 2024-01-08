@@ -12,7 +12,7 @@ from app.auth.config import AuthConfig, auth_config
 from app.auth.exceptions import InvalidCredentials
 from app.auth.security import check_password
 from app.api.schemas.auth import UserCreate, UserFromDB, UserRefreshTokenFromDB
-from app.services.user import UserService
+from app.services.user_service import UserService
 from app.utils.unitofwork import IUnitOfWork
 
 logger = logging.getLogger(__name__)

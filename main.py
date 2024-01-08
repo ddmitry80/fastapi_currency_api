@@ -8,7 +8,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.dependencies.db import UOWDep
 from app.db.database import init_db_schema
-from app.services.user import UserService
+from app.services.user_service import UserService
 from app.api.routers.routers import all_routers
 
 logger = logging.getLogger(__name__)

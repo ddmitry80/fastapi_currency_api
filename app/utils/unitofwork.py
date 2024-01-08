@@ -41,7 +41,7 @@ class UnitOfWork(IUnitOfWork):
         self.session_factory = async_session_maker
 
     async def __aenter__(self):
-        logger.debug("begin uow context manager")
+        logger.debug("UnitOfWork: begin context manager")
         self.session = self.session_factory()
 
         self.user = UserRepository(self.session)
@@ -50,10 +50,12 @@ class UnitOfWork(IUnitOfWork):
         self.rate = RateRepository(self.session)
 
     async def __aexit__(self, *args):
+        logger.debug("UnitOfWork: exit context manager")
         await self.rollback()
         await self.session.close()
 
     async def commit(self):
+        logger.debug("UnitOfWork: commit")
         await self.session.commit()
 
     async def rollback(self):

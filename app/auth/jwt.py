@@ -12,7 +12,7 @@ import jwt
 from app.auth.exceptions import AuthorizationFailed, AuthRequired, InvalidToken
 from app.api.schemas.auth import JWTData, UserFromDB
 from app.core.config import settings
-from app.services.user import UserService
+from app.services.user_service import UserService
 # from src.auth.service import get_user_by_id
 
 logger = logging.getLogger(__name__)

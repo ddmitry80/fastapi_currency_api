@@ -1,5 +1,6 @@
 import logging
-from logging import config as logging_config
+import app.utils.logging_init
+
 from httpx import AsyncClient
 from pydantic import ConfigDict 
 from fastapi import status
@@ -7,11 +8,11 @@ from fastapi import status
 from sqlalchemy import NullPool
 from app.api.schemas.auth import UserCreate
 
-logging_config.fileConfig('logging.ini')
+
 
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
-from app.services.user import UserService
+from app.services.user_service import UserService
 from app.utils.unitofwork import IUnitOfWork, UnitOfWork
 from app.core.config import settings, Settings
 from app.db.database import Base

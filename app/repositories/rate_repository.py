@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 from app.api.schemas.currencies import CurrencyFromDB
 from app.api.schemas.rates import RateFromAPI, RateFromDB
 from app.db.models import Rate

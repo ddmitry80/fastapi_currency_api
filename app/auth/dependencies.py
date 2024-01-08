@@ -8,7 +8,7 @@ from app.api.dependencies.db import UOWDep
 from app.auth.exceptions import EmailTaken, RefreshTokenNotValid
 from app.auth.service import get_refresh_token
 from app.api.schemas.auth import UserCreate, UserFromDB, UserRefreshTokenFromDB
-from app.services.user import UserService
+from app.services.user_service import UserService
 from app.utils.unitofwork import UnitOfWork
 
 logger = logging.getLogger(__name__)

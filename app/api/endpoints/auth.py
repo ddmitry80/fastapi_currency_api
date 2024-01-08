@@ -9,7 +9,7 @@ from app.auth.service import verify_user, create_refresh_token, expire_refresh_t
 
 from app.api.schemas.auth import AccessTokenResponse, JWTData, UserCreate, UserFromDB, UserRefreshTokenFromDB, UserResponse
 # from app.api.endpoints.auth.service import
-from app.services.user import UserService 
+from app.services.user_service import UserService 
 
 logger = logging.getLogger(__name__)
 

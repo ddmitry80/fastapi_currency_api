@@ -3,7 +3,7 @@ import logging
 from typing import Any
 from pydantic import BaseModel
 
-from sqlalchemy import CursorResult, select, insert, update
+from sqlalchemy import CursorResult, func, select, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.auth import CustomModel
@@ -68,3 +68,12 @@ class Repository(AbstractRepository):
         logger.debug(f"update_one: result={result.to_log()}")
         return result
 
+    async def find_max_value(self, field_name: str) -> Any:
+        """Возвращает запись с максимальным значением из таблицы, по полю field_name"""
+        logger.debug("find_max_value: filed_name=%s", field_name)
+        max_field = func.max(getattr(self.model, field_name))
+        stmt = select(max_field).limit(1)
+        res = await self.session.execute(stmt)
+        max_row = res.scalar_one()
+        logger.debug("find_max_value: result=%s, type=%s", repr(max_row), type(max_row))
+        return max_row

@@ -5,10 +5,10 @@ from fastapi import APIRouter
 from app.api.dependencies.db import UOWDep
 from app.api.schemas.currencies import CurrencyCreate
 
-from app.api.schemas.rates import RateFromAPI, RatesUpdateStatus
-from app.services.currency import CurrencyService
-from app.services.network import NetworkService
-from app.services.rate import RateService
+from app.api.schemas.rates import RateFromAPI, RatesLastUpdateResponse, RatesUpdateStatus
+from app.services.currency_service import CurrencyService
+from app.services.network_service import NetworkService
+from app.services.rate_service import RateService
 
 
 logger = logging.getLogger(__name__)
@@ -41,3 +41,12 @@ async def update_rates(uow: UOWDep) -> RatesUpdateStatus:
         )
     logger.debug("update_rates: response=%s", response.to_log())
     return response
+
+
+@router.get("/last_update")
+async def get_last_update_datetime(uow: UOWDep) -> RatesLastUpdateResponse:
+    max_datetime = await RateService.get_max_datetime(uow)
+    result = RatesLastUpdateResponse(updated_at=max_datetime)
+
+    logger.debug("get_last_update_datetime: result=%s", result.to_log())
+    return result
