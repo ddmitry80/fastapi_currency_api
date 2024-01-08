@@ -2,6 +2,7 @@ import logging
 from logging import config as logging_config
 import os
 import yaml
+# import coloredlogs
 
 
 def setup_logging(default_path='logging.yaml', default_level=logging.INFO, env_key='LOG_CFG'):
