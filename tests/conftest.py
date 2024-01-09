@@ -4,7 +4,16 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient
 import pytest
 
-from main import app, includer_routers
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from app.core.config import settings
+from app.db.database import Base
+import app.db.database
+from app.services.user_service import UserService
+from app.utils.unitofwork import UnitOfWork
+
+# from main import app, includer_routers
+from main import includer_routers
 
 # @pytest.fixture(autouse=True, scope="session")
 # def run_migrations() -> None:
@@ -22,9 +31,45 @@ def anyio_backend():
 
 @pytest.fixture(scope="session")
 async def client() -> AsyncGenerator[AsyncClient, None]:
+    from main import app
+    
     host, port = "127.0.0.1", "9000"
 
     async with AsyncClient(app=app, base_url=f"http://{host}:{port}") as ac:
         includer_routers()
         yield ac
 
+
+@pytest.fixture(scope="session")
+async def async_db_sesstion():
+    if settings.MODE == 'TEST':
+        engine_uri = settings.ASYNC_DATABASE_URL
+        # engine = create_async_engine(engine_uri, echo=True, poolclass=NullPool)
+        engine = create_async_engine(engine_uri, echo=True)
+        async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
+
+        app.db.database.engine = engine
+        app.db.database.async_session_maker = async_session_maker
+
+        await app.db.database.init_db_schema()
+        print(f"async_db_sesstion: init db schema done")
+
+        yield async_session_maker
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+    else:
+        raise ValueError("Настройки не в TEST режиме: смотри .env и .test.env")
+
+
+@pytest.fixture(scope="session")
+async def mock_uow(async_db_sesstion) -> UnitOfWork:
+
+    uow = UnitOfWork()
+    uow.session_factory = async_db_sesstion
+
+    print(f"UnitOfWork: init done")
+
+    # Вставляю в БД тестовых пользователей
+    async with uow:
+        await UserService.insert_test_data(uow=uow)
+        yield uow
