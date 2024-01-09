@@ -38,6 +38,6 @@ class Base(DeclarativeBase):
 async def init_db_schema():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-        logging.info('drop schema')
+        logger.info('drop schema')
         await conn.run_sync(Base.metadata.create_all)
-    logging.info("init_db_schema: done")
+    logger.info("init_db_schema: done")
