@@ -73,10 +73,7 @@ async def with_uow(async_db_sesstion) -> UnitOfWork:
     uow.session_factory = async_db_sesstion
 
     print(f"UnitOfWork: init done")
-
-    # Вставляю в БД тестовых пользователей
     async with uow:
-        
         yield uow
 
 
