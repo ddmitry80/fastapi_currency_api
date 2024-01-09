@@ -1,4 +1,6 @@
 # import asyncio
+import app.utils.logging_init
+import logging
 from typing import AsyncGenerator, Generator
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -15,6 +17,8 @@ from app.utils.unitofwork import UnitOfWork
 
 # from main import app, includer_routers
 from main import includer_routers
+
+logger = logging.getLogger(__name__)
 
 # @pytest.fixture(autouse=True, scope="session")
 # def run_migrations() -> None:
@@ -55,17 +59,22 @@ async def async_db_sesstion():
     # app.db.database.engine = engine
     # app.db.database.async_session_maker = async_session_maker
     # from app.db.database import async_session_maker
-    import app.db.database
-    from app.db.database import async_session_maker
+    # import app.db.database
+    from app.db.database import engine, async_session_maker
 
-    await app.db.database.init_db_schema()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        logger.debug('drop schema')
+        await conn.run_sync(Base.metadata.create_all)
+
+        logging.info("init_db_schema: done")   
     print(f"async_db_sesstion: init db schema done")
 
     yield async_session_maker
 
-    # async with engine.begin() as conn:
-    #     await conn.run_sync(Base.metadata.drop_all)
-    # await engine.dispose()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
         
 
 
