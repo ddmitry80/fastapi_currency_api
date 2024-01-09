@@ -54,10 +54,9 @@ async def test_get_las_update_datetime(with_uow: UnitOfWork, client: AsyncClient
 
     
 
-async def test_fetch_rates(with_uow: UnitOfWork, main_app,  client: AsyncClient, monkeypatch):
-    main_app.dependency_overrides[UnitOfWork] = with_uow
-    
-    class AsyncMock:
+async def test_fetch_rates(client, monkeypatch):
+   
+    class MockAiohttpClientSessionGet:
         json_data = None
         status = None
         def __init__(*args, **kwargs):
@@ -69,11 +68,11 @@ async def test_fetch_rates(with_uow: UnitOfWork, main_app,  client: AsyncClient,
         async def json(self):
             return self.json_data
     
-    class AsyncMockCurrencies(AsyncMock):
+    class AsyncMockCurrencies(MockAiohttpClientSessionGet):
         json_data = {"symbols": {"USD": "US Dollar", "EUR": "Euro"}}
         status = 200
 
-    class AsyncMockRates(AsyncMock):
+    class AsyncMockRates(MockAiohttpClientSessionGet):
         json_data = {"rates": {"USD": 1.1, "EUR": 1}}
         status = 200
 
