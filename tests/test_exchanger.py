@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from httpx import AsyncClient
 from fastapi import Response, status
 import pytest
@@ -6,9 +7,11 @@ import datetime
 from app.api.schemas.currencies import CurrencyCreate
 from app.api.schemas.rates import RateCreate, RateFromAPI, RatesLastUpdateResponse
 from app.services.currency_service import CurrencyService
+from app.services.network_service import NetworkService
 from app.services.rate_service import RateService
 from app.utils.unitofwork import UnitOfWork
 
+# Отмечаю, что все тесте в файле - асинхронные, с anyio
 pytestmark = pytest.mark.anyio
 
 @pytest.fixture(scope="session", autouse=True)
@@ -46,3 +49,41 @@ async def test_get_las_update_datetime(with_uow: UnitOfWork, client: AsyncClient
     dt_delta = datetime.datetime.now() - datetime.datetime.fromisoformat(updated_at)
     print(f"{updated_at=}, {dt_delta=}")
     assert  dt_delta < datetime.timedelta(seconds=60)
+
+
+
+    
+
+async def test_fetch_rates(with_uow: UnitOfWork, main_app,  client: AsyncClient, monkeypatch):
+    main_app.dependency_overrides[UnitOfWork] = with_uow
+    
+    class AsyncMock:
+        json_data = None
+        status = None
+        def __init__(*args, **kwargs):
+            pass
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *error_info):
+            return self
+        async def json(self):
+            return self.json_data
+    
+    class AsyncMockCurrencies(AsyncMock):
+        json_data = {"symbols": {"USD": "US Dollar", "EUR": "Euro"}}
+        status = 200
+
+    class AsyncMockRates(AsyncMock):
+        json_data = {"rates": {"USD": 1.1, "EUR": 1}}
+        status = 200
+
+    with monkeypatch.context() as m:
+        m.setattr("aiohttp.ClientSession.get", AsyncMockCurrencies)
+        currs = await NetworkService().fetch_currencies()
+        m.setattr("aiohttp.ClientSession.get", AsyncMockRates)
+        rates = await NetworkService().fetch_rates()
+    # print(f"{currs=}, {rates=}")
+
+    assert currs == [CurrencyCreate(name='US Dollar', code='USD'), CurrencyCreate(name='Euro', code='EUR')]
+    assert rates == [RateFromAPI(rate=1.1, currency='USD'), RateFromAPI(rate=1.0, currency='EUR')]
+

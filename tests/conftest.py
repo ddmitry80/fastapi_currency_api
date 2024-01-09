@@ -1,5 +1,6 @@
 # import asyncio
 from typing import AsyncGenerator, Generator
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
 import pytest
@@ -28,14 +29,16 @@ def anyio_backend():
     return "asyncio", {"use_uvloop": True}
 
 
+@pytest.fixture(scope="session")
+async def main_app() -> FastAPI:
+    from main import app
+    return app
+
 
 @pytest.fixture(scope="session")
-async def client() -> AsyncGenerator[AsyncClient, None]:
-    from main import app
-
+async def client(main_app) -> AsyncGenerator[AsyncClient, None]:
     host, port = "127.0.0.1", "9000"
-
-    async with AsyncClient(app=app, base_url=f"http://{host}:{port}") as ac:
+    async with AsyncClient(app=main_app, base_url=f"http://{host}:{port}") as ac:
         includer_routers()
         yield ac
 
