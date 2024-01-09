@@ -32,7 +32,7 @@ def anyio_backend():
 @pytest.fixture(scope="session")
 async def client() -> AsyncGenerator[AsyncClient, None]:
     from main import app
-    
+
     host, port = "127.0.0.1", "9000"
 
     async with AsyncClient(app=app, base_url=f"http://{host}:{port}") as ac:
@@ -42,27 +42,32 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
 @pytest.fixture(scope="session")
 async def async_db_sesstion():
-    if settings.MODE == 'TEST':
-        engine_uri = settings.ASYNC_DATABASE_URL
-        # engine = create_async_engine(engine_uri, echo=True, poolclass=NullPool)
-        engine = create_async_engine(engine_uri, echo=True)
-        async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
-
-        app.db.database.engine = engine
-        app.db.database.async_session_maker = async_session_maker
-
-        await app.db.database.init_db_schema()
-        print(f"async_db_sesstion: init db schema done")
-
-        yield async_session_maker
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-    else:
+    if settings.MODE != 'TEST':
         raise ValueError("Настройки не в TEST режиме: смотри .env и .test.env")
+    # engine_uri = settings.ASYNC_DATABASE_URL
+    # # engine = create_async_engine(engine_uri, echo=True, poolclass=NullPool)
+    # engine = create_async_engine(engine_uri, echo=True)
+    # async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
+
+    # app.db.database.engine = engine
+    # app.db.database.async_session_maker = async_session_maker
+    # from app.db.database import async_session_maker
+    import app.db.database
+    from app.db.database import async_session_maker
+
+    await app.db.database.init_db_schema()
+    print(f"async_db_sesstion: init db schema done")
+
+    yield async_session_maker
+
+    # async with engine.begin() as conn:
+    #     await conn.run_sync(Base.metadata.drop_all)
+    # await engine.dispose()
+        
 
 
 @pytest.fixture(scope="session")
-async def mock_uow(async_db_sesstion) -> UnitOfWork:
+async def with_uow(async_db_sesstion) -> UnitOfWork:
 
     uow = UnitOfWork()
     uow.session_factory = async_db_sesstion
@@ -71,5 +76,13 @@ async def mock_uow(async_db_sesstion) -> UnitOfWork:
 
     # Вставляю в БД тестовых пользователей
     async with uow:
-        await UserService.insert_test_data(uow=uow)
+        
         yield uow
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def add_users(with_uow):
+    uow = with_uow
+
+    await UserService.insert_test_data(uow=uow)
+    await uow.commit()

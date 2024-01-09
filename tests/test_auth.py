@@ -29,19 +29,19 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.anyio
 class TestDBIntegration:
-    async def test_read_user(self, mock_uow: UnitOfWork, client: AsyncClient):
-        user = await mock_uow.user.fetch_one(id=1)
+    async def test_read_user(self, with_uow: UnitOfWork, client: AsyncClient):
+        user = await with_uow.user.fetch_one(id=1)
         assert user.email == "u1@example.com"
         assert user.is_admin == True
 
-    async def test_create_user(self, mock_uow: UnitOfWork, client: AsyncClient):
+    async def test_create_user(self, with_uow: UnitOfWork, client: AsyncClient):
         new_user = UserCreate(email="test@example.com", password="A12345a!")
 
         response = await client.post('/auth/users', json=new_user.model_dump())
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json()["email"] == new_user.email
 
-    async def test_login(self, mock_uow: UnitOfWork, client: AsyncClient):
+    async def test_login(self, with_uow: UnitOfWork, client: AsyncClient):
         auth_body = {"username": "u2@example.com", "password": "Aa1234!", "grant_type": "password"}
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
@@ -51,7 +51,7 @@ class TestDBIntegration:
         assert response.json()["refresh_token"] is not None
 
     
-    async def test_bad_login(self, mock_uow: UnitOfWork, client: AsyncClient):
+    async def test_bad_login(self, with_uow: UnitOfWork, client: AsyncClient):
         auth_body = {"username": "u_xxx@example.com", "password": "Aa1234!", "grant_type": "password"}
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
