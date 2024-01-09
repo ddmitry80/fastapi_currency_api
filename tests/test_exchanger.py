@@ -41,18 +41,15 @@ async def test_latest_rate(with_uow: UnitOfWork, client: AsyncClient):
     assert rate.rate == 1.09475
 
 
-async def test_get_las_update_datetime(with_uow: UnitOfWork, client: AsyncClient):
+async def test_get_las_update_datetime(async_db_sesstion, with_uow: UnitOfWork, client: AsyncClient):
     result: Response = await client.get("/api/last_update")
     assert result.status_code == status.HTTP_200_OK
     updated_at = result.json()["updated_at"]
     assert updated_at is not None
-    dt_delta = datetime.datetime.now() - datetime.datetime.fromisoformat(updated_at)
+    dt_delta = datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(updated_at)
     print(f"{updated_at=}, {dt_delta=}")
     assert  dt_delta < datetime.timedelta(seconds=60)
 
-
-
-    
 
 async def test_fetch_rates(client, monkeypatch):
    
