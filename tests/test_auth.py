@@ -49,3 +49,11 @@ class TestDBIntegration:
         assert response.status_code == 200
         assert response.json()["access_token"] is not None
         assert response.json()["refresh_token"] is not None
+
+    
+    async def test_bad_login(self, mock_uow: UnitOfWork, client: AsyncClient):
+        auth_body = {"username": "u_xxx@example.com", "password": "Aa1234!", "grant_type": "password"}
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
+        response = await client.post("/auth/users/tokens", data=auth_body, headers=headers)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
