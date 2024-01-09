@@ -22,8 +22,8 @@ class User(Base):
     
     tokens: Mapped[List[UserRefreshToken]] = relationship(back_populates="user")
 
-    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, onupdate=func.now(), nullable=True)
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
 
     def to_pydantic_model(self) -> UserFromDB:
         return UserFromDB.model_validate(self)
@@ -40,8 +40,8 @@ class UserRefreshToken(Base):
     refresh_token: Mapped[str] = mapped_column(String, nullable=False)
     expires_at: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
 
-    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, onupdate=func.now(), nullable=True)
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
 
     def to_pydantic_model(self) -> UserFromDB:
         return UserRefreshTokenFromDB.model_validate(self)
@@ -54,8 +54,8 @@ class Currency(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     code: Mapped[str] = mapped_column(String(10), unique=True, nullable=False)
 
-    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     rates: Mapped[List[Rate]] = relationship("Rate", back_populates="currency")
 
@@ -70,8 +70,8 @@ class Rate(Base):
     currency_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Currency.id, ondelete='CASCADE'), nullable=False)
     rate: Mapped[float]
 
-    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     currency: Mapped[Currency] = relationship(Currency, back_populates="rates")
 
