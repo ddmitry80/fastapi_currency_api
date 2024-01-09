@@ -39,20 +39,30 @@ class IUnitOfWork(ABC):
 class UnitOfWork(IUnitOfWork):
     def __init__(self):
         self.session_factory = async_session_maker
+        self._hierarchy = 0
+        self.session = None
 
-    async def __aenter__(self):
-        logger.debug("UnitOfWork: begin context manager")
-        self.session = self.session_factory()
-
+    def _init_repositories(self):
         self.user = UserRepository(self.session)
         self.refresh_token = UserRefreshTokenRepository(self.session)
         self.currency = CurrencyRepository(self.session)
         self.rate = RateRepository(self.session)
 
+    async def __aenter__(self):
+        logger.debug("UnitOfWork: begin context manager, current level=%s", self._hierarchy)
+        if self.session is None:
+            self.session = self.session_factory()
+        self._hierarchy += 1
+        self._init_repositories()
+
     async def __aexit__(self, *args):
-        logger.debug("UnitOfWork: exit context manager")
+        logger.debug("UnitOfWork: exit context manager, current level=%s", self._hierarchy)
         await self.rollback()
-        await self.session.close()
+        self._hierarchy -= 1
+        if self._hierarchy == 0:
+            await self.session.close()
+            self.session = None
+        self._init_repositories()
 
     async def commit(self):
         logger.debug("UnitOfWork: commit")

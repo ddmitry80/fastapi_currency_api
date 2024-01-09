@@ -8,11 +8,11 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 engine = create_async_engine(settings.ASYNC_DATABASE_URL, echo=False)  # создали движок БД
-async_session_maker = async_sessionmaker(engine, class_=AsyncSession)  # передали наш движок в создатель сессий
+async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)  # передали наш движок в создатель сессий
 
 
 async def get_async_session():
-    async with async_session_maker() as session:
+    async with async_session_maker(subtransactions=True) as session:
         yield session
 
 
