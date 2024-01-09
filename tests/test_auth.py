@@ -6,9 +6,7 @@ from fastapi import status
 # from sqlalchemy import NullPool
 
 from app.api.schemas.auth import UserCreate
-from app.utils.unitofwork import IUnitOfWork, UnitOfWork
-from app.core.config import Settings
-# import app.db.database
+from app.utils.unitofwork import UnitOfWork
 
 
 logger = logging.getLogger(__name__)
