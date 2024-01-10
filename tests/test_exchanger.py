@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
 from httpx import AsyncClient
-from fastapi import Response, status
+from fastapi import FastAPI, Response, status
 import pytest
 import datetime
+from app.api.schemas.auth import UserFromDB
 
 from app.api.schemas.currencies import CurrencyCreate
 from app.api.schemas.rates import RateCreate, RateFromAPI, RatesLastUpdateResponse
+from app.auth.jwt import get_current_user
 from app.services.currency_service import CurrencyService
 from app.services.network_service import NetworkService
 from app.services.rate_service import RateService
@@ -41,7 +43,8 @@ async def test_latest_rate(with_uow: UnitOfWork, client: AsyncClient):
     assert rate.rate == 1.09475
 
 
-async def test_get_las_update_datetime(async_db_sesstion, with_uow: UnitOfWork, client: AsyncClient):
+async def test_get_las_update_datetime(async_db_sesstion, with_uow: UnitOfWork, main_app: FastAPI, client: AsyncClient):
+    main_app.dependency_overrides[get_current_user] = lambda : UserFromDB(id=1, email="u1@example.com", is_admin=True)
     result: Response = await client.get("/api/last_update")
     assert result.status_code == status.HTTP_200_OK
     updated_at = result.json()["updated_at"]
