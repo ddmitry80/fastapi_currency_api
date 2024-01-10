@@ -33,6 +33,7 @@ async def get_my_account(uow: UOWDep, user: GetAuthenticatedUser) -> UserRespons
     logger.debug("get_my_account: result=%s", result.to_log())
     return result
 
+
 @router.post("/users/tokens/json", response_model=AccessTokenResponse)
 async def auth_user_json(auth_data: UserCreate, response: Response, uow: UOWDep) -> AccessTokenResponse:
     logger.info(f"auth_user: {auth_data.email=}")

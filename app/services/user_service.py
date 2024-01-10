@@ -25,6 +25,8 @@ class UserService:
         logger.debug("create_user: user=%s", user.to_log())
         async with uow:
             user = await uow.user.add_one(user)
+            await uow.commit()
+        logger.info(f"create_user: user={user.to_log()}")
         return user
 
     @staticmethod
