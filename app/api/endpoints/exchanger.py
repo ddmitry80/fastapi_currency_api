@@ -21,7 +21,7 @@ router = APIRouter(
 
 
 @router.get("/update_rates")
-async def update_rates(uow: UOWDep) -> RatesUpdateStatus:
+async def update_rates(uow: UOWDep, user: GetAuthenticatedUser) -> RatesUpdateStatus:
     currencies_list: List[CurrencyCreate] = await NetworkService().fetch_currencies()
     rates_list: List[RateFromAPI] = await NetworkService().fetch_rates()
     updated_at=datetime.datetime.utcnow()
@@ -45,7 +45,7 @@ async def update_rates(uow: UOWDep) -> RatesUpdateStatus:
 
 
 @router.get("/last_update")
-async def get_last_update_datetime(uow: UOWDep) -> RatesLastUpdateResponse:
+async def get_last_update_datetime(uow: UOWDep, user: GetAuthenticatedUser) -> RatesLastUpdateResponse:
     max_datetime = await RateService.get_max_datetime(uow)
     result = RatesLastUpdateResponse(updated_at=max_datetime)
 
