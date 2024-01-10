@@ -52,6 +52,7 @@ async def test_get_las_update_datetime(async_db_sesstion, with_uow: UnitOfWork, 
     dt_delta = datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(updated_at)
     print(f"{updated_at=}, {dt_delta=}")
     assert  dt_delta < datetime.timedelta(seconds=60)
+    # assert 1==0
 
 
 async def test_fetch_rates(client, monkeypatch):
