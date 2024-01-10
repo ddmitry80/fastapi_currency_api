@@ -49,7 +49,7 @@ async def get_last_update_datetime(uow: UOWDep, user: GetAuthenticatedUser) -> R
     max_datetime = await RateService.get_max_datetime(uow)
     result = RatesLastUpdateResponse(updated_at=max_datetime)
 
-    logger.debug("get_last_update_datetime: result=%s", result.to_log())
+    logger.debug("get_last_update_datetime: result=%s, user=%s", result.to_log(), user.to_log())
     return result
 
 
