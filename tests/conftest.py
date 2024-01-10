@@ -33,13 +33,13 @@ def anyio_backend():
     return "asyncio", {"use_uvloop": True}
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 async def main_app() -> FastAPI:
     from main import app
     return app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 async def client(main_app) -> AsyncGenerator[AsyncClient, None]:
     host, port = "127.0.0.1", "9000"
     async with AsyncClient(app=main_app, base_url=f"http://{host}:{port}") as ac:
