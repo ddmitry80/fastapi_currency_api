@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from typing import Type
+import sqlalchemy.exc
 
 from app.db.database import async_session_maker
 from app.repositories.currency_repository import CurrencyRepository
@@ -49,10 +50,10 @@ class UnitOfWork(IUnitOfWork):
         self.rate = RateRepository(self.session)
 
     async def __aenter__(self):
-        logger.debug("UnitOfWork: begin context manager, current level=%s", self._hierarchy)
         if self.session is None:
             self.session = self.session_factory()
         self._hierarchy += 1
+        logger.debug("UnitOfWork: begin context manager, level=%s", self._hierarchy)
         self._init_repositories()
 
     async def __aexit__(self, *args):
@@ -65,8 +66,18 @@ class UnitOfWork(IUnitOfWork):
         self._init_repositories()
 
     async def commit(self):
-        logger.debug("UnitOfWork: commit")
-        await self.session.commit()
+        if self._hierarchy == 1:
+            logger.debug("UnitOfWork: commit called at level=1, do commit")
+            await self.session.commit()
+        elif self._hierarchy > 1:
+            # await self.session.refresh()
+            logger.debug("UnitOfWork: commit called at level=%s, do nothing", self._hierarchy)
+        else:
+            raise sqlalchemy.exc.InterfaceError("UnitOfWork: Попытка вызова commit без контекста")
 
     async def rollback(self):
-        await self.session.rollback()
+        if self._hierarchy == 1:
+            logger.debug("UnitOfWork: rollback calldd at level=1, do rollback")
+            await self.session.rollback()
+        else:
+            logger.debug("UnitOfWork: rollback calldd at level=%s, do nothing", self._hierarchy)
